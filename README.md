@@ -1,0 +1,4 @@
+CPTST
+=====
+
+CloudParty TypeScript Typings
