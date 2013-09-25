@@ -44,3 +44,99 @@ var val = getParam('my_parameter');
 var i = inc('index');
 
 set('index', 100);
+
+decEntState({
+    state_key: 'my_key',
+    key: 'localhandicap'
+});
+
+decGlobalState({
+    state_key: 'my_key',
+    key: 'functionslefttodocument'
+});
+
+decUserState({
+    user: getMessageUser(),
+    state_key: 'my_key',
+    key: 'handicap'
+});
+
+getEntState({
+    state_key: 'my_key',
+    keys: ['lastplayer'],
+    callback: 'lastPlayerReturned'
+});
+
+getGlobalState({
+    state_key: 'my_key',
+    keys: ['topplayer', 'topscore'],
+    callback: 'topScorerReturned'
+});
+
+getUserState({
+    user: getMessageUser(),
+    state_key: 'my_key',
+    keys: ['bestscore', 'lastscore'],
+    callback: 'scoresReturned'
+});
+
+incEntState({
+    state_key: 'my_key',
+    key: 'localplaycount'
+});
+
+incGlobalState({
+    state_key: 'my_key',
+    key: 'totalplaycount'
+});
+
+incUserState({
+    user: getMessageUser(),
+    state_key: 'my_key',
+    key: 'playcount'
+});
+
+setEntState({
+    state_key: 'my_key',
+    data: { lastplayer: 'bob' }
+});
+
+setGlobalState({
+    state_key: 'my_key',
+    data: { topplayer: 'bob', topscore: 100 }
+});
+
+setStateKeyDefault('my_key');
+
+setUserState({
+    user: getMessageUser(),
+    state_key: 'my_key',
+    data: { bestscore: 100, lastscore: 10 }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

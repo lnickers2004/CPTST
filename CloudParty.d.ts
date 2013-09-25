@@ -45,6 +45,34 @@ interface Entities {
     [index: number]: Entity;
 }
 
+interface State_Key extends Object {
+
+}
+
+interface User extends Object {
+
+}
+
+interface Key extends Object {
+
+}
+
+interface Keys {
+    [index: number]: Key;
+}
+
+interface Callback extends Object {
+
+}
+
+interface Callback_Data extends Object {
+
+}
+
+interface Check extends Object {
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                             *** Messaging ***                              //
@@ -213,7 +241,7 @@ declare function tell(
   * 
   * @param key Key to decrement.  
   */
-declare function dec(key: Key): number; // check lib.d.ts for "Key"!!!
+declare function dec(key: Key): number; // check lib.d.ts for "Key"!!! conflicts?
 
 /** 
   * Gets the value in your local state
@@ -310,31 +338,290 @@ declare function setUnary(key: Key, op: Operator): any; //any?? Operator ot stri
 // state is per - state key, so you can store state across all use of your
 // scripts, regardless of the user or entity.
 
-declare function decEntState(obj);
+/** 
+  * Decrements the value of a key in this entities' persistent state.
+  * -------------------------------------------
+  * - If the key's value is undefined it is treated as 0, and thus set to -1
+  * - Setting data into persistent state is an asynchronous operation
+  *
+  * @param obj Argument Object describing key to decrement. 
+  */
+declare function decEntState(
+    obj: {
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Name of key to decrement. */
+        key: Key
+    }
+): void;
 
-declare function decGlobalState(obj);
+/** 
+  * decrements the value of a key in the global persistent state.
+  * -------------------------------------------
+  * - If the key's value is undefined it is treated as 0, and thus set to -1
+  * - Setting data into persistent state is an asynchronous operation
+  *
+  * @param obj Argument Object describing key to decrement. 
+  */
+declare function decGlobalState(
+    obj: {
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Name of key to decrement. */
+        key: Key
+    }
+): void;
 
-declare function decUserState(obj);
+/** 
+  * decrements the value of a key in the user's persistent state.
+  * -------------------------------------------
+  * - If the key's value is undefined it is treated as 0, and thus set to -1
+  * - Setting data into persistent state is an asynchronous operation
+  *
+  * @param obj Argument Object describing key to decrement. 
+  */
+declare function decUserState(
+    obj: {
+        /** User to change. */
+        user: User;
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Name of key to decrement. */
+        key: Key
+    }
+): void;
 
-declare function getEntState(obj);
+/** 
+  * Calls a callback with the values associated with requested keys in
+  * this entities' persistent state
+  * -------------------------------------------
+  * - The callback is always called, even if the key(s) are not present in
+  * the persistant state
+  *
+  * @param obj Argument Object describing keys to get. 
+  */
+declare function getEntState(
+    obj: {
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Array of keys (strings) that you want returned in the callback's
+          * context.data. */
+        keys: Keys;
+        /** Callback function with context.data fields set to the keys/value
+          * pairs from this entities state. */
+        callback: Callback;
+        /** Arbitrary object which has its fields copied to the callback
+          * function's context.data. */
+        callback_data?: Callback_Data
+    }
+): void;
 
-declare function getGlobalState(obj);
+/** 
+  * Calls a callback with the values associated with requested keys in
+  * the global persistent state
+  * -------------------------------------------
+  * - The callback is always called, even if the key(s) are not present in
+  * the persistant state
+  *
+  * @param obj Argument Object describing keys to get. 
+  */
+declare function getGlobalState(
+    obj: {
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Array of keys (strings) that you want returned in the callback's
+          * context.data. */
+        keys: Keys;
+        /** Callback function with context.data fields set to the keys/value
+          * pairs from this entities state. */
+        callback: Callback;
+        /** Arbitrary object which has its fields copied to the callback
+          * function's context.data. */
+        callback_data?: Callback_Data
+    }
+): void;
 
-declare function getUserState(obj);
+/** 
+  * Calls a callback with the values associated with requested keys in
+  * the user's persistent state
+  * -------------------------------------------
+  * - The object provided to the callback will automatically have the user field
+  * set
+  * - The callback is always called, even if the key(s) are not present in
+  * the persistant state
+  *
+  * @param obj Argument Object describing keys to get. 
+  */
+declare function getUserState(
+    obj: {
+        /** User to get. */
+        user: User;
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Array of keys (strings) that you want returned in the callback's
+          * context.data. */
+        keys: Keys;
+        /** Callback function with context.data fields set to the keys/value
+          * pairs from this entities state. */
+        callback: Callback;
+        /** Arbitrary object which has its fields copied to the callback
+          * function's context.data. */
+        callback_data?: Callback_Data
+    }
+): void;
 
-declare function incEntState(obj);
+/** 
+  * Increments the value of a key in this entities' persistent state
+  * -------------------------------------------
+  * - If the key's value is undefined it is treated as 0, and thus set to 1
+  * - Setting data into persistent state is an asynchronous operation
+  *
+  * @param obj Argument Object describing key to increment. 
+  */
+declare function incEntState(
+    obj: {
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Name of key to increment. */
+        key: Key;
+    }
+): void;
 
-declare function incGlobalState(obj);
+/** 
+  * Increments the value of a key in the global persistent state
+  * -------------------------------------------
+  * - If the key's value is undefined it is treated as 0, and thus set to 1
+  * - Setting data into persistent state is an asynchronous operation
+  *
+  * @param obj Argument Object describing key to increment. 
+  */
+declare function incGlobalState(
+    obj: {
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Name of key to increment. */
+        key: Key;
+    }
+): void;
 
-declare function incUserState(obj);
+/** 
+  * Increments the value of a key in the user's persistent state
+  * -------------------------------------------
+  * - If the key's value is undefined it is treated as 0, and thus set to 1
+  * - Setting data into persistent state is an asynchronous operation
+  *
+  * @param obj Argument Object describing key to increment. 
+  */
+declare function incUserState(
+    obj: {
+        /** User to change. */
+        user: User;
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Name of key to increment. */
+        key: Key;
+    }
+): void;
 
-declare function setEntState(obj);
+/** 
+  * Sets key/value pairs in this entities' persistent state
+  * -------------------------------------------
+  * - Setting data into persistent state is an asynchronous operation
+  * - If checked key/values do not match the existing state's key/values,
+  * the existing state will not be changed, and the callback's context.data will
+  * have the err field set and the check field will be set to an object with the
+  * existing state's key/values.
+  *
+  * @param obj Argument Object describing keys to set. 
+  */
+declare function setEntState(
+    obj: {
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Object with key/value pairs to set. */
+        data: Data;
+        /** Object with key/value pairs to check against existing state. Any
+          * mismatch results in failure.. */
+        check?: Check;
+        /** Callback function when the set has completed, context.data fields
+          * may include err and check. */
+        callback?: Callback;
+        /** Optional arbitrary object whose fields are copied to the callback
+          * function's context.data. */
+        callback_data?: Callback_Data
+    }
+): void;
 
-declare function setGlobalState(obj);
+/** 
+  * Sets key/value pairs in the global persistent state
+  * -------------------------------------------
+  * - Setting data into persistent state is an asynchronous operation
+  * - If checked key/values do not match the existing state's key/values,
+  * the existing state will not be changed, and the callback's context.data will
+  * have the err field set and the check field will be set to an object with the
+  * existing state's key/values.
+  *
+  * @param obj Argument Object describing keys to set. 
+  */
+declare function setGlobalState(
+    obj: {
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Object with key/value pairs to set. */
+        data: Data;
+        /** Object with key/value pairs to check against existing state. Any
+          * mismatch results in failure. */
+        check?: Check;
+        /** Callback function when the set has completed, context.data fields
+          * may include err and check. */
+        callback?: Callback;
+        /** Optional arbitrary object whose fields are copied to the callback
+          * function's context.data. */
+        callback_data?: Callback_Data
+    }
+): void;
 
-declare function setStateKeyDefault(state_key);
+/** 
+  * Sets a default state_key for the UserState, EntState and GlobalState
+  * functions
+  * -------------------------------------------
+  * - If this is set, the UserState, EntState and GlobalState functions will use
+  * it as their state_key if one is not specified for them.
+  *
+  * @param state_key Default state key to use. 
+  */
+declare function setStateKeyDefault(state_key?: State_Key): void;
 
-declare function setUserState(obj);
+/** 
+  * Sets key/value pairs in the user's persistent state
+  * -------------------------------------------
+  * - Setting data into persistent state is an asynchronous operation
+  * - If checked key/values do not match the existing state's key/values,
+  * the existing state will not be changed, and the callback's context.data will
+  * have the err field set and the check field will be set to an object with the
+  * existing state's key/values.
+  *
+  * @param obj Argument Object describing keys to set. 
+  */
+declare function setUserState(
+    obj: {
+        /** User to set. */
+        user: User;
+        /** State key to access data. */
+        state_key?: State_Key;
+        /** Object with key/value pairs to set. */
+        data: Data;
+        /** Object with key/value pairs to check against existing state. Any
+          * mismatch results in failure. */
+        check?: Check;
+        /** Callback function when the set has completed, context.data fields
+          * may include err and check. */
+        callback?: Callback;
+        /** Optional arbitrary object whose fields are copied to the callback
+          * function's context.data. */
+        callback_data?: Callback_Data
+    }
+): void;
 
 
 ////////////////////////////////////////////////////////////////////////////////
