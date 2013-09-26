@@ -178,6 +178,41 @@ vecPosRotate(v, [0, 0, 90]);
 
 vecRotRotate(r, [0, 0, 90]);
 
+var fromPlayer = entIsPlayer(getCreatorEnt());
+
+var ent = getCreatorEnt();
+
+getEntFields({ ent: getMessageEnt(), callback: 'clickerInfo', fields: ['pos', 'rot'] });
+
+getEnts({ radius: 10, callback: 'foundPlayers', channel: 'player', fields: ['pos', 'rot'] });
+
+var ent = getMessageEnt();
+
+var ent = getSelfEnt();
+
+reset();
+reset({ ent: entity });
+
+resetNear(5);
+
+resetSpawned();
+
+spawn({ prefab: 'parameter name', pos: [0, 0, 0], rot: [0, 0, 0], scale: [1, 1, 1], linear: [0, 0, 0], angular: [0, 0, 0], gravity: [0, 0, -9.8], created_data: {}, callback: 'function name', callback_data: {} });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

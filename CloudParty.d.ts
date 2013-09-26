@@ -102,6 +102,19 @@ interface VectorPOS extends Vector {
 interface VectorROT extends Vector {
 
 }
+
+interface VectorSCALE extends Vector {
+
+}
+
+interface VectorVEL extends Vector {
+
+}
+
+interface Prefab extends Object {
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                             *** Messaging ***                              //
@@ -1357,31 +1370,215 @@ declare function vecSub(vec1: Vector, vec2: Vector): void;
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-declare function entIsPlayer(ent);
+/** 
+  * Returns true if the entity is a player
+  *
+  * @param ent Entity to check.
+  */
+declare function entIsPlayer(ent: Entity): boolean;
 
-declare function getCreatorEnt();
+/** 
+  * Called from a transient entity, returns the entity that created (spawned)
+  * you.
+  */
+declare function getCreatorEnt(): Entity;
 
-declare function getEntFields(obj);
+/** 
+  * Retrieves the values for the requested fields from the ent, and calls
+  * the callback script with the results.
+  * -------------------------------------------
+  * - Valid fields to request are:
+  *   - 'display_name' : the displayed name, if any - may not exist on all
+  * entities.
+  *   - 'player' : if the target is a player.
+  *   - 'pos' : position.
+  *   - 'rot' : rotation.
+  *   - 'linear' : world linear velocity.
+  *   - 'angular' : local angular velocity.
+  *   - 'gravity' : gravity.
+  *   - 'owner_user' : the user that owns the entity.
+  * - If the entity for which information is requested is no longer valid,
+  * "destroyed" is returned in context.data.err.
+  * - Currently, requesting the linear velocity of a player may give incorrect
+  * values. It may return a random value,
+  * or [0,0,0] even if the player is moving.
+  *
+  * @param obj Entity to check.
+  */
+declare function getEntFields(
+    obj: {
+        /** The entity to inspect. */
+        ent: Entity;
+        /** Fields to include in callback function's context.data. */
+        fields: Array;
+        /** Callback function with its context.data.ent set to an ent. */
+        callback: Callback;
+        /** Arbitrary object which has its fields copied to the callback
+          * function's context.data. */
+        callback_data?: Callback_Data
+    }
+): void;
 
-declare function getEnts(obj);
+/** 
+  * Finds entities listening to a channel within a radius and calls a callback
+  * script for each of them.
+  * -------------------------------------------
+  * - This is considered a Broadcast, and multiple Broadcasts are limited by
+  * the Broadcast queue - see Script Limits
+  * - Either callback or callback_done must be specified
+  * - Valid fields to request are:
+  *   - 'display_name' : the displayed name, if any - may not exist on all
+  * entities.
+  *   - 'player' : if the target is a player.
+  *   - 'pos' : position.
+  *   - 'rot' : rotation.
+  *   - 'linear' : world linear velocity.
+  *   - 'angular' : local angular velocity.
+  *   - 'owner_user' : the user that owns the entity.
+  * - Some fields that work with getEntFields() may be unavailable using
+  * getEnts()
+  *
+  * @param obj Argument Object describing what entities to search for.
+  */
+declare function getEnts(
+    obj: {
+        /** The radius to search (Spherical). */
+        radius: number;
+        /** Per-entity callback function with its context.data.ent set to
+          * an ent. */
+        callback?: Callback;
+        /** Final callback function called after all per-ent callbacks, with
+          * context.data.ents set to an object with all ents found. */
+        callback_done?: Callback;
+        /** Arbitrary object which has its fields copied to the callback
+          * function's context.data. */
+        callback_data?: Callback_Data
+        /** Channel to search for nearby entities. */
+        channel?: Channel;
+        /** Fields to include in callback function's context.data. */
+        fields?: Array;
+    }
+): void;
 
-declare function getMessageEnt(message?: Object);
+/** 
+  * Returns the ent that sent a message received by a handler.
+  *
+  * @param message Message Object from getMessage().
+  */
+declare function getMessageEnt(message?: Message): Entity;
 
-declare function getSelfEnt();
+/** 
+  * Returns your own ent.
+  */
+declare function getSelfEnt(): Entity;
 
-declare function reset(obj);
+/** 
+  * Reset an entity to its spawn location (or destroy if it's transient.).
+  * -------------------------------------------
+  * - Spawned entities are only allowed to be reset once per second. If you call
+  * reset() on an entity more often than this, there will be a delay (initially
+  * 1 second, max of 32 seconds) before the entity gets respawned after it is
+  * destroyed.
+  *
+  * @param obj Argument Object describing what to reset.
+  */
+declare function reset(
+    obj?: {
+        /** The entity to reset. */
+        ent?: Entity
+    }
+): void;
 
-declare function resetNear(radius);
+/** 
+  * Reset nearby entities to their spawn location.
+  * -------------------------------------------
+  * - This is considered a Broadcast, and multiple Broadcasts are limited by
+  * the Broadcast queue - see Script Limits
+  * - Affects all prefabs within the radius, not just those spawned by the
+  * script that executes the resetNear() function,
+  * - Does it affect other users scripts?
+  *
+  * @param radius Radius of entities to reset.
+  */
+declare function resetNear(radius: number): void;
 
-declare function resetSpawned();
+/** 
+  * Resets (destroys) all transient entities the script has spawned.
+  */
+declare function resetSpawned(): void;
 
-declare function spawn(obj);
+/** 
+  * Spawns a transient entity relative to self.
+  * -------------------------------------------
+  * - The spawned entity automatically inherits the world scale of the spawner,
+  * however the pos parameter is *not* automatically modified by the world scale
+  * of the spawner.
+  * - Entities spawned from a script are transient. They will be removed if
+  * the containing object is moved in build mode, if the script is reset, if
+  * the island goes idle, or if "Reset to Spawner" or "Reset Nearby Entities" is
+  * selected from the contextual menu.
+  * - Entities can not be spawned more than 10 meters from the perimeter of the
+  * object. The function will silently fail if it is outside of these bounds.
+  * - The number of spawned entities are limited by island size. 100 for a small
+  * island, ??? for a large. Exceeding this will generate an error on
+  * scriptdebug and a message to everyone around.
+  * - For linear and angular velocities to have any effect, the prefab to be
+  * spawned must be of type Physical Simulated.
+  * - The customizer object uses its field names for the names of the
+  * customizers to change, and the value of each field should be an object with
+  * either a 'value' or 'param' field. The behavior of these fields is the same
+  * as their behavior in customizerSet.
+  * - Spawning multiple entities is limited by the Spawn queue -
+  * see Script Limits
+  * - In order to be able to access the data passed by the spawning entity, you
+  * need to hand it over to a user function on top level and store it in local
+  * state.
+  *
+  * @param obj Argument Object describing how and where to spawn a prefab.
+  */
+declare function spawn(
+    obj: {
+        /** The prefab to spawn. */
+        prefab: Prefab;
+        /** Marker of the spawner to apply to the default position, rotation and
+          * scale. */
+        marker_id?: string;
+        /** Relative position offset from default position. */
+        pos?: VectorPOS;
+        /** Relative rotation offset from default rotation. */
+        rot?: VectorROT;
+        /** Relative scale from default scale. */
+        scale?: VectorSCALE;
+        /** Linear velocity applied to spawned entity. */
+        linear?: VectorVEL;
+        /** Angular velocity applied to spawned entity. */
+        angular?: VectorVEL; //another type?
+        /** Inherit the parent object's linear velocity. */
+        inherit_linear?: boolean;
+        /** Inherit the parent object's angular velocity. */
+        inherit_angular?: boolean;
+        /** Gravity used by spawned entity. */
+        gravity?: VectorVEL; //another type?
+        /** Object which has its fields used to set the spawned entity's
+          * customizers. */
+        customizers?: customizersObject;
+        /** Object which has its fields copied to spawned entity's
+          * context.data. */
+        created_data?: someDataObject;
+        /** Callback function with its context.data.ent set to the created
+          * entity. */
+        callback?: Callback;
+        /** Object which has its fields copied to the callback function's
+          * context.data. */
+        callback_data?: Callback_Data;
+    }
+): void;
 
-///////////////////////////////////////////////////
-//
-//  Users
-//
-///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                               *** Users ***                                //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 declare function getMessageUser(message);
 
