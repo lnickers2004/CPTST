@@ -76,7 +76,32 @@ interface Check extends Object {
 interface Script extends Object {
 
 }
+/** 
+  * An array of 3 numbers.
+  * Example: [ 1, 2, 3 ]
+  */
+interface Vector {
+    x: number;
+    y: number;
+    z: number;
+}
 
+/**
+  * A positional vector [X, Y, Z].
+  * Example: [ 0, 0, 5 ]
+  */
+interface VectorPOS extends Vector {
+
+}
+
+/** 
+  * A rotational vector [yaw, pitch, roll] ([rotation around Z axis, rotation
+  * around X axis, rotation around Y axis]). 
+  * Example: [ 0, 180, 90 ]
+  */
+interface VectorROT extends Vector {
+
+}
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                             *** Messaging ***                              //
@@ -1013,87 +1038,324 @@ declare function now(): number;
 // Note that unlike the actual javascript Math functions, functions that use
 // angles operate in degrees, not radians.
 
-declare function clamp(x, min, max);
+/** 
+  * Returns the x value clamped to [min .. max].
+  *
+  * @param x Value to clamp.
+  * @param min Minimum return value.
+  * @param max Maximum return value.
+  */
+declare function clamp(x: number, min: number, max: number): number;
 
-declare function degrees(radians);
+/** 
+  * Returns the radian value converted to degrees.
+  * -------------------------------------------
+  * - All math functions (except this one) expect degrees
+  *
+  * @param radians Radians to convert.
+  */
+declare function degrees(radians: number): number;
 
-declare function mod(x, y);
+/** 
+  * Returns x mod y, but handles negative numbers per modulo arithmetic - e.g.
+  * in JavaScript -1 % 10 returns -1, whereas mod(-1, 10) will return 9.
+  *
+  * @param x Dividend.
+  * @param y Divisor.
+  */
+declare function mod(x: number, y: number): number;
 
-declare function radians(degrees);
+/** 
+  * Returns the degree value converted to radians.
+  * -------------------------------------------
+  * - All math functions expect degrees.
+  *
+  * @param degrees Degrees to convert.
+  */
+declare function radians(degrees: number): number;
 
-declare function randomInt(min, max);
+/** 
+  * Returns a random integer in the range [min .. max].
+  *
+  * @param min Minimum value to possibly return.
+  * @param max Maximum value to possibly return.
+  */
+declare function randomInt(
+    min: number /* integer */,
+    max: number /* integer */
+): number;
 
-declare function randomRange(min, max);
+/** 
+  * Returns a random number in the range [min .. max).
+  *
+  * @param min Minimum value to possibly return.
+  * @param max Maximum value, no returned value will be greater than or equal
+  * to this.
+  */
+declare function randomRange(min: number, max: number): number;
 
-///////////////////////////////////////////////////
-//
-//  Script Calling
-//
-///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                              *** Vectors ***                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
-declare function getForwardFromRot(vec);
+// Vectors are just a length 3 array of numbers. Except where noted, all vector
+// functions operate directly on theirleftmost argument instead of returning
+// a new array.
 
-declare function getRotFromForward(forward, up);
+/** 
+  * Returns a normalized forward vector given a rotation vector.
+  * -------------------------------------------
+  * - Assumes [0, 1, 0] as neutral forward.
+  *
+  * @param vec Rotation vector.
+  */
+declare function getForwardFromRot(vec: VectorROT): VectorPOS;
 
-declare function randomVec(radius, volume);
+/** 
+  * Returns a rotation vector (in euler angles) given a forward and optional up
+  * vector.
+  *
+  * @param forward Forward vector.
+  * @param up Up vector.
+  */
+declare function getRotFromForward(forward: VectorPOS, up: VectorPOS): VectorROT;
 
-declare function vecAbs(vec);
+/** 
+  * Returns a random vector on the surface of a sphere.
+  *
+  * @param radius Radius of the sphere.
+  * @param volume Indicates the vector should be random in the sphere volume,
+  * instead of on the sphere surface.
+  */
+declare function randomVec(radius: number, volume: boolean): VectorPOS;
 
-declare function vecAdd(vec1, vec2);
+/** 
+  * Applies component-wise absolute value.
+  *
+  * @param vec Vector to transform.
+  */
+declare function vecAbs(vec: Vector): void;
 
-declare function vecAddScalar(vec, s);
+/** 
+  * Adds vec2 to vec1.
+  *
+  * @param vec1 Vector to add to.
+  * @param vec2 Vector to add.
+  */
+declare function vecAdd(vec1: Vector, vec2: Vector): void;
 
-declare function vecAddScaled(vec1, vec2, s);
+/** 
+  * Adds s to each element of vec.
+  *
+  * @param vec Vector to be added to.
+  * @param s Number to add.
+  */
+declare function vecAddScalar(vec: Vector, s: number): void;
 
-declare function vecAngle(vec1, vec2);
+/** 
+  * Adds vec2*s to vec1.
+  *
+  * @param vec1 Vector to add to.
+  * @param vec2 Vector to scale and then add.
+  * @param s Scalar.
+  */
+declare function vecAddScaled(vec1: Vector, vec2: Vector, s: number): void;
 
-declare function vecCross(vec1, vec2);
+/** 
+  * Returns angle in degrees between vec1 and vec2.
+  * -------------------------------------------
+  * - If both vectors are normalized it is more efficient to call
+  * acos(vecDot(vec1, vec2))
+  *
+  * @param vec1 One of a pair of vectors to find the angle between.
+  * @param vec2 One of a pair of vectors to find the angle between.
+  */
+declare function vecAngle(vec1: Vector, vec2: Vector): number/* angle */;
 
-declare function vecDistance(vec1, vec2);
+/** 
+  * Applies right-handed cross product of vec1 by vec2.
+  *
+  * @param vec1 Vector to be cross-producted.
+  * @param vec2 Vector to cross-product with.
+  */
+declare function vecCross(vec1: Vector, vec2: Vector): void;
 
-declare function vecDistanceSquared(vec1, vec2);
+/** 
+  * Returns distance between vec1 and vec2.
+  * -------------------------------------------
+  * - vecDistanceSquared is more efficient if only doing comparisons (don't
+  * need an actual distance)
+  *
+  * @param vec1 A position vector.
+  * @param vec2 A position vector.
+  */
+declare function vecDistance(vec1: VectorPOS, vec2: VectorPOS): number;
+/* distance? */
 
-declare function vecDiv(vec1, vec2);
+/** 
+  * Returns squared distance between vec1 and vec2.
+  * -------------------------------------------
+  * - More efficient than vecDistance
+  *
+  * @param vec1 A position vector.
+  * @param vec2 A position vector.
+  */
+declare function vecDistanceSquared(vec1: VectorPOS, vec2: VectorPOS): number;
+/* distance? */
 
-declare function vecDot(vec1, vec2);
+/** 
+  * Component-wise divides vec1 by vec2.
+  *
+  * @param vec1 Vector to be divided.
+  * @param vec2 Vector to divided by.
+  */
+declare function vecDiv(vec1: Vector, vec2: Vector): void;
 
-declare function vecDup(vec);
+/** 
+  * Returns dot product of vec1 and vec2.
+  *
+  * @param vec1 Vector to dot.
+  * @param vec2 Vector to dot.
+  */
+declare function vecDot(vec1: Vector, vec2: Vector): number/* dot product */;
 
-declare function vecInterp(vec1, vec2, s);
+/** 
+  * Returns a new copy of a vector..
+  *
+  * @param vec Vector to dot.
+  */
+declare function vecDup(vec: Vector): Vector;
 
-declare function vecInvert(vec);
+/** 
+  * Interpolates vec1 to vec2 by s.
+  *
+  * @param vec1 Initial vector.
+  * @param vec2 Destination vector.
+  * @param s Interpolation factor (0.0 = vec1, 1.0 = vec2).
+  */
+declare function vecInterp(vec1: Vector, vec2: Vector, s: number): void;
 
-declare function vecLength(vec);
+/** 
+  * Applies component-wise invert (i.e. [1/x, 1/y, 1/z]).
+  *
+  * @param vec Vector to transform.
+  */
+declare function vecInvert(vec: Vector): void;
 
-declare function vecLengthSquared(vec);
+/** 
+  * Returns the length of a vector.
+  * -------------------------------------------
+  * - vecLengthSquared is more efficient if only doing comparisons (don't need
+  * an actual length)
+  *
+  * @param vec Vector to find the length of.
+  */
+declare function vecLength(vec: VectorPOS): number/* lenght */;
 
-declare function vecMul(vec1, vec2);
+/** 
+  * Returns the squared length of a vector
+  * -------------------------------------------
+  * - This is more efficient than vecLength
+  *
+  * @param vec Vector to find the length of.
+  */
+declare function vecLengthSquared(vec: VectorPOS): number/* lenght */;
 
-declare function vecMulScalar(vec, s);
+/** 
+  * Component-wise multiplies vec1 by vec2
+  *
+  * @param vec1 Vector to be multiplied.
+  * @param vec2 Vector to multiply by.
+  */
+declare function vecMul(vec1: Vector, vec2: Vector): void;
 
-declare function vecNormalize(vec);
+/** 
+  * Multiplies vec by s
+  *
+  * @param vec Vector to be multiplied.
+  * @param s Number to multiply by.
+  */
+declare function vecMulScalar(vec: Vector, s: number): void;
 
-declare function vecPosRotate(pos, rot);
+/** 
+  * Normalizes (scales so that length is 1.0)
+  *
+  * @param vec Vector to transform.
+  */
+declare function vecNormalize(vec: VectorPOS): void;
 
-declare function vecPosWorldToRel(vec);
+/** 
+  * Rotates the pos vector by the rotation vector around the origin
+  *
+  * @param pos Positional vector to rotate.
+  * @param rot Amount to rotate.
+  */
+declare function vecPosRotate(pos: VectorPOS, rot: VectorROT): void;
 
-declare function vecPosWorldToRotRel(vec);
+/** 
+  * Transforms the position from a world pos to a relative pos (relative to the
+  * position of the entity running the script)
+  *
+  * @param vec Position to transform.
+  */
+declare function vecPosWorldToRel(vec: VectorPOS): void;
 
-declare function vecRotInvert(rot);
+/** 
+  * Transforms the position from a world pos to a rotation-relative relative pos
+  * (relative to the position and rotation
+  * of the entity running the script)
+  *
+  * @param vec Position to transform.
+  */
+declare function vecPosWorldToRotRel(vec: VectorPOS): void;
 
-declare function vecRotRotate(rot1, rot2);
+/** 
+  * Inverts a rotational vector
+  *
+  * @param rot Rotation to invert.
+  */
+declare function vecRotInvert(rot: VectorROT): void;
 
-declare function vecRotWorldToRel(rot);
+/** 
+  * Rotates the rot vector by the second rot vector.
+  *
+  * @param rot1 Rotational vector to rotate.
+  * @param rot2 Amount to rotate.
+  */
+declare function vecRotRotate(rot1: VectorROT, rot2: VectorROT): void;
 
-declare function vecSlerp(vec1, vec2, s);
+/** 
+  * Transforms the rotation from a world rot to a relative rot (relative to
+  * the rotation of the entity running the script)
+  *
+  * @param rot Rotation to transform.
+  */
+declare function vecRotWorldToRel(rot: VectorROT): void;
 
-declare function vecSub(vec1, vec2);
+/** 
+  * Performs slerp (quaternion interpolation of rotation) from vec1 to vec2 by s
+  *
+  * @param vec1 Initial rotation vector.
+  * @param vec2 Destination vector.
+  * @param s Interpolation factor (0.0 = vec1, 1.0 = vec2).
+  */
+declare function vecSlerp(vec1: VectorROT, vec2: VectorROT, s: number): void;
 
-///////////////////////////////////////////////////
-//
-//  Entities
-//
-///////////////////////////////////////////////////
+/** 
+  * Subtracts vec2 from vec1
+  *
+  * @param vec1 Vector to be subtracted from.
+  * @param vec2 Vector to subtract.
+  */
+declare function vecSub(vec1: Vector, vec2: Vector): void;
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             *** Entities ***                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 declare function entIsPlayer(ent);
 

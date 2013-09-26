@@ -153,3 +153,24 @@ var now_time = dateToTimeString(now());
 var now_utc = dateToUTCString(now());
 
 var start_time = now();
+
+var x = 3.14;
+clamp(x, 0, 1);
+
+degrees(1.57);
+
+mod(5, 2);
+
+radians(180);
+
+randomInt(1, 6);
+
+randomRange(-1.5, 1.5);
+
+getForwardFromRot([0, 0, 180]);
+
+var newVec = vecDup(v);
+
+vecPosRotate(v, [0, 0, 90]);
+
+vecRotRotate(r, [0, 0, 90]);
