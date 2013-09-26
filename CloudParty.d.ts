@@ -887,7 +887,7 @@ declare function stringReplace(
 // that the user could be anywhere in the world, in any timezone, using any
 // language, and as a result, properly formatting a date or time for a
 // particular user is a challenging task.Modern web browsers can do this
-// automatically to a certain, limited degree.Thus, to make it as painless as
+// automatically to a certain, limited degree. Thus, to make it as painless as
 // possible to display dates to the user in their native format, our client will
 // automatically localize dates for you in two specific circumstances:
 //   - If the client sees an ISO or UTC time string anywhere in chat (e.g. say,
@@ -899,27 +899,119 @@ declare function stringReplace(
 // There is no way to customize the formatting of the automatic localization,
 // though this is something we would like to support in the future.
 
-declare function dateFromString(string);
+/** 
+  * Returns the time in UTC milliseconds based on the ISO or UTC time string.
+  * -------------------------------------------
+  * - Returned value is UTC milliseconds
+  * - Allowed string formats are ISO (e.g. '2013-05-09T20:20:34.840Z') and UTC
+  * (e.g. 'Thu, 09 May 2013 20:20:34 GMT'). Anything else will generate an error
+  * and return undefined.
+  *
+  * @param string ISO or UTC time string to parse.
+  */
+declare function dateFromString(string: string): number;
 
-declare function dateFromValues(year, month, date, hours, minutes, seconds, milliseconds);
+/** 
+  * Returns the time in UTC milliseconds based on the values provided for each
+  * component.
+  * -------------------------------------------
+  * - Returned value is UTC milliseconds
+  * - Follows JavaScript convention where year and date are 1-based, while
+  * month, hours, minutes, seconds and milliseconds are 0-based
+  * - Any value not specified is assumed to be 0, except date, which is assumed
+  * to be 1
+  *
+  * @param string ISO or UTC time string to parse.
+  */
+declare function dateFromValues(
+    year?: number,/* integer */
+    month?: number,/* integer */
+    date?: number,/* integer */
+    hours?: number,/* integer */
+    minutes?: number,/* integer */
+    seconds?: number,/* integer */
+    milliseconds?: number/* integer */
+): number;
 
-declare function dateToDateString(date);
+/** 
+  * Returns the date portion of the UTC time string (e.g. 'Thu, 09 May 2013')
+  * of the provided date in UTC milliseconds.
+  * -------------------------------------------
+  * - Assumes the date argument is UTC milliseconds
+  *
+  * @param date Date in UTC milliseconds.
+  */
+declare function dateToDateString(date: number/* integer */): string;
+// should date be its own type/interface???
 
-declare function dateToISOString(date);
+/** 
+  * Returns the ISO time string (e.g. '2013-05-09T20:20:34.840Z') of
+  * the provided date in UTC milliseconds.
+  * -------------------------------------------
+  * - Assumes the date argument is UTC milliseconds
+  *
+  * @param date Date in UTC milliseconds.
+  */
+declare function dateToISOString(date: number/* integer */): string;
+// should date be its own type/interface???
 
-declare function dateToObject(date);
+/** 
+  * Returns an object with the component values of the provided date in UTC
+  * milliseconds.
+  * -------------------------------------------
+  * - Assumes the date argument is UTC milliseconds
+  * - Follows JavaScript convention where year and date are 1-based, while month,
+  * hours, minutes, seconds and milliseconds are 0-based
+  * - The primary fields are year, month, date, hours, minutes, seconds, milliseconds, the same fields or arguments
+  * expected for dateFromObject and dateFromValues.
+  * - Also included is a day field, which is the 0-based day of the week
+  * (0 = Sunday).
+  *
+  * @param date Date in UTC milliseconds.
+  */
+declare function dateToObject(date: number/* integer */): Object;
+// should date be its own type/interface???
 
-declare function dateToTimeString(date);
+/** 
+  * Returns the time portion of the UTC time string (e.g. '20:20:34') of
+  * the provided date in UTC milliseconds.
+  * -------------------------------------------
+  * - Assumes the date argument is UTC milliseconds
+  *
+  * @param date Date in UTC milliseconds.
+  */
+declare function dateToTimeString(date: number/* integer */): string;
+// should date be its own type/interface???
 
-declare function dateToUTCString(date);
+/** 
+  * Returns the UTC time string (e.g. 'Thu, 09 May 2013 20:20:34 GMT') of
+  * the provided date in UTC milliseconds.
+  * -------------------------------------------
+  * - Assumes the date argument is UTC milliseconds
+  *
+  * @param date Date in UTC milliseconds.
+  */
+declare function dateToUTCString(date: number/* integer */): string;
+// should date be its own type/interface???
 
-declare function now();
+/** 
+  * Returns the current time in UTC milliseconds.
+  * -------------------------------------------
+  * - The value returned will not change at any point during a script frame
+  */
+declare function now(): number;
 
-///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                *** Math ***                                //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+// Every JavaScript Math function is exposed -
+// e.g.random() returns Math.random(), atan2(y, x) returns Math.atan2(y, x).
 //
-//  Math
-//
-///////////////////////////////////////////////////
+// Note that unlike the actual javascript Math functions, functions that use
+// angles operate in degrees, not radians.
 
 declare function clamp(x, min, max);
 

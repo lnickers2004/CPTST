@@ -137,3 +137,19 @@ arrayPermute([0, 1, 2, 3]);
 arraySort([0, 1, -1, 2]);
 
 var hatbar = stringReplace({ string: 'foobar', find: 'foo', replace: 'hat' });
+
+var time = dateFromString('2013-05-09T20:20:34.840Z');
+
+var today = dateFromValues(2013, 4, 9);
+
+var now_date = dateToDateString(now());
+
+var now_iso = dateToISOString(now());
+
+var now_obj = dateToObject(now());
+
+var now_time = dateToTimeString(now());
+
+var now_utc = dateToUTCString(now());
+
+var start_time = now();
