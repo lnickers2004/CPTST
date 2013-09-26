@@ -76,6 +76,7 @@ interface Check extends Object {
 interface Script extends Object {
 
 }
+
 /** 
   * An array of 3 numbers.
   * Example: [ 1, 2, 3 ]
@@ -1000,7 +1001,8 @@ declare function dateToISOString(date: number/* integer */): string;
   * - Assumes the date argument is UTC milliseconds
   * - Follows JavaScript convention where year and date are 1-based, while month,
   * hours, minutes, seconds and milliseconds are 0-based
-  * - The primary fields are year, month, date, hours, minutes, seconds, milliseconds, the same fields or arguments
+  * - The primary fields are year, month, date, hours, minutes, seconds,
+  * milliseconds, the same fields or arguments
   * expected for dateFromObject and dateFromValues.
   * - Also included is a day field, which is the 0-based day of the week
   * (0 = Sunday).
