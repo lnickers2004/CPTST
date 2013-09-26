@@ -73,6 +73,10 @@ interface Check extends Object {
 
 }
 
+interface Script extends Object {
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                             *** Messaging ***                              //
@@ -630,35 +634,137 @@ declare function setUserState(
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-declare function clone(obj, deep);
+/** 
+  * Creates a new instance of the provided object or array
+  * -------------------------------------------
+  * - Arrays are also valid to clone
+  * - Shallow clones are simply new objects or arrays with all the top-level
+  * fields or elements copied, not cloned. Thus any changes you make inside sub-
+  * objects (or sub-arrays) will be reflected in both the original object and
+  * clone object.
+  * - Deep clones make clones of all sub-objects as well, so no changes made to
+  * the original object or clone object will be reflected in the other.
+  * - Deep cloning can fail, make sure you check to see if you got a useful
+  * result back.
+  *
+  * @param obj Object to clone. 
+  * @param deep Optionally clone all sub-objects. 
+  */
+declare function clone(obj?: Object, deep?: boolean): Object;
 
-declare function deleteProp(obj, prop);
+/** 
+  * Deletes the requested property from the object
+  * (equivalent to delete obj[prop])
+  * -------------------------------------------
+  * - There is no reason to use this instead of simply deleting a property
+  * directly.
+  *
+  * @param obj Object to delete a value from. 
+  * @param prop Property name. 
+  */
+declare function deleteProp(obj: Object, prop: string): undefined; //???
 
-declare function getCostBudgetUsed();
+/** 
+  * A number in the range [0..1] representing the current cost this object has
+  * incurred this frame running scripts, relative to its total budget.
+  */
+declare function getCostBudgetUsed(): number;
 
-declare function getProp(obj, prop);
+/** 
+  * Retrieves the requested property of the object
+  * (equivalent to obj[prop])
+  * -------------------------------------------
+  * - There is no reason to use this instead of simply accessing a property
+  * directly.
+  *
+  * @param obj Object to retrieve a value from. 
+  * @param prop Property name. 
+  */
+declare function getProp(obj: Object, prop: string): any; //???
 
-declare function keys(obj);
+/** 
+  * Returns an objects keys as strings in an array
+  * -------------------------------------------
+  * - Keys are not guaranteed to be in any particular order
+  *
+  * @param obj Object with keys to get. 
+  */
+declare function keys(obj: Object): Array;
 
-declare function parse(str);
+/** 
+  * Converts a JSON string into an object, array, or simple data type
+  * -------------------------------------------
+  * - Input must be valid JSON or an error will be thrown and the function will
+  * return undefined
+  * - stringify() with default parameters does not generate valid JSON, since
+  * JSON requires quotes on keys, so parse(stringify(obj)) will not work by
+  * default as a method to clone an object.
+  *
+  * @param str String to parse.
+  */
+declare function parse(str: string): Object;
 
-declare function parseFloat(string);
+/** 
+  * Parses a string to return a floating point number.
+  * -------------------------------------------
+  *
+  * @param str String to parse.
+  */
+declare function parseFloat(str: string): number;
 
-declare function parseInt(string, radix);
+/** 
+  * Parses a string to return an integer number.
+  * -------------------------------------------
+  *
+  * @param str String to parse.
+  * @param radix Radix to use in parsing.
+  */
+declare function parseInt(str: string, radix: number/*integer*/): number; // integer
 
-declare function setProp(obj, prop, value);
+/** 
+  * Sets the requested property of the object to the value
+  * (equivalent to obj[prop] = value)
+  * -------------------------------------------
+  * - There is no reason to use this instead of simply setting the property
+  * directly.
+  *
+  * @param obj Object to modify.
+  * @param prop String to parse.
+  * @param value String to parse.
+  * @returns The value passed in.
+  */
+declare function setProp(obj: Object, prop: string, value: Object): Object;
 
+/** 
+  * Converts any object, array, or simple data type to a JSON-style readable
+  * string
+  * -------------------------------------------
+  * - Strings are returned verbatim, not wrapped in any sort of quotation mark.
+  * - Objects are returned JSON-style, but are not guaranteed to be JSON-legal,
+  * since it may not quote the keys (required for JSON), writes undefined values
+  * as 'undefined' instead of 'null', safely handles circular objects and
+  * truncates the output beyond a certain length.
+  *
+  * @param obj Object to stringify.
+  * @param options Options object.
+  */
 declare function stringify(
     obj: Object,
     options?: {
+        /** Use two-space indentation. */
         indent?: boolean;
+        /** Use newlines. */
         newline?: boolean;
+        /** Always quote keys. */
         quote_keys?: boolean;
+        /** Always include fields set to undefined. */
         include_undefined?: boolean;
-        max_length?: number;
-        max_depth?: number
+        /** Limit the output length. */
+        max_length?: number; // integer
+        /** Limit the object inspection depth. */
+        max_depth?: number // integer
     }
-    ): string;
+): string;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -666,66 +772,132 @@ declare function stringify(
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-//  Many built- in functions on array - type objects are allowed.See http://www.w3schools.com/jsref/jsref_obj_array.asp for a reference.
-
+//  Many built- in functions on array - type objects are allowed.
+//
 //  The allowed functions are:
+//  - indexOf
+//  - lastIndexOf
+//  - pop
+//  - push
+//  - reverse
+//  - shift
+//  - slice
+//  - splice
+//  - unshift
 
-//  indexOf
-//  lastIndexOf
-//  pop
-//  push
-//  reverse
-//  shift
-//  slice
-//  splice
-//  unshift
+/** 
+  * Permutes (randomizes) the order of the elements of the array and returns it.
+  * -------------------------------------------
+  * - The permutation is random, so calling the function is not guaranteed to
+  * change the order of the elements.
+  *
+  * @param array Array to permute.
+  */
+declare function arrayPermute(array: Array): Array;
 
-declare function arrayPermute(array);
+/** 
+  * Sorts the array and returns it.
+  * -------------------------------------------
+  * - The array you provide is modified in place, and returned to you. If there
+  * is an error, the function returns undefined.
+  * - The optional script function should take two arguments and return a value
+  * appropriate for sorting the two arguments (usually 1, -1 or 0).
+  * - The budget cost of this function depends on the size of the array being
+  * sorted, and the cost of the sort function itself. It is possible that no
+  * sorting will be performed if it's likely that doing so would exceed the budget.
+  *
+  * @param array Array to sort.
+  * @param script Optionally sort function name.
+  */
+declare function arraySort(array: Array, script?: Script): Array;
 
-declare function arraySort(array, script);
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                          *** String Objects ***                            //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////
+//  Many built- in functions on string - type objects are allowed.
 //
-//  String Objects
-//
-///////////////////////////////////////////////////
-
-//  Many built- in functions on string - type objects are allowed.See http://www.w3schools.com/jsref/jsref_obj_string.asp for a reference.
-
 //  The allowed functions are:
+//  - indexOf
+//  - lastIndexOf
+//  - replace
+//  - slice
+//  - split
+//  - substr
+//  - substring
+//  - toLowerCase
+//  - toUpperCase
 
-//  indexOf
-//  lastIndexOf
-//  replace
-//  slice
-//  split
-//  substr
-//  substring
-//  toLowerCase
-//  toUpperCase
+/** 
+  * Returns a string resulting from performing a find and replace on the input
+  * string.
+  * -------------------------------------------
+  * - You can simply call replace() on a string instead of using the long form
+  * of this function (e.g. 'foobar'.replace('foo', 'hat')).
+  * - The modifiers parameter follows JavaScript conventions
+  *   -- The default behavior is a case-sensitive find and replace of the first
+  * instance of the find string.
+  *   -- A 'g' in the modifiers string makes the find and replace global (e.g.
+  * will find and replace all instances of the find string, rather than just
+  * the first.
+  *   -- A 'i' in the modifiers string makes the find case-insensitive (e.g.
+  * 'foo' will match both 'foo' and 'Foo').
+  *
+  * @param obj Argument Object describing the replacement to perform.
+  */
+declare function stringReplace(
+    obj: {
+        /** Original string. */
+        str: string;
+        /** String to find. */
+        find: string;
+        /** String to use as replacement. */
+        replace: string;
+        /** String of modifiers to apply to find and replace. */
+        modifiers?: string
+    }
+): string;
 
-declare function stringReplace(obj);
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                          *** Number Objects ***                            //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////
+//  Many built- in functions on number - type objects are allowed.
 //
-//  Number Objects
-//
-///////////////////////////////////////////////////
-
-//  Many built- in functions on number - type objects are allowed.See http://www.w3schools.com/jsref/jsref_obj_number.asp for a reference.
-
 //  The allowed functions are:
+//  - toExponential
+//  - toFixed
+//  - toPrecision
 
-//  toExponential
-//  toFixed
-//  toPrecision
-//  No script functions found in category Number Objects
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                               *** Dates ***                                //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////
+// Dates on the server are always integers representing UTC milliseconds since
+// Jan 1, 1970, and there are a number of functions available to get and
+// manipulate date values.
 //
-//  Dates
+// It is important to keep in mind that if you want to display dates to a user,
+// that the user could be anywhere in the world, in any timezone, using any
+// language, and as a result, properly formatting a date or time for a
+// particular user is a challenging task.Modern web browsers can do this
+// automatically to a certain, limited degree.Thus, to make it as painless as
+// possible to display dates to the user in their native format, our client will
+// automatically localize dates for you in two specific circumstances:
+//   - If the client sees an ISO or UTC time string anywhere in chat (e.g. say,
+// error, tell, etc), it will replace that string with the localized equivalent
+//   - If the client sees a <span> tag with a data-date attribute (e.g. in a
+// script - created dialog or controller), it will replace the contents of the
+// span with the localized equivalent of the value of the data - date attribute
 //
-///////////////////////////////////////////////////
+// There is no way to customize the formatting of the automatic localization,
+// though this is something we would like to support in the future.
 
 declare function dateFromString(string);
 

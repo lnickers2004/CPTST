@@ -110,3 +110,30 @@ setUserState({
     state_key: 'my_key',
     data: { bestscore: 100, lastscore: 10 }
 });
+
+clone({ foo: 'bar', num: 7 });
+
+var myObject;
+deleteProp(myObject, 'foo');
+
+var cost = getCostBudgetUsed();
+
+getProp(myObject, 'foo');
+
+keys({ foo: 'bar', num: 7 });
+
+parse('{"foo":"bar","num":7}');
+
+parseFloat('123.45');
+
+parseInt('123', 10);
+
+setProp(myObject, 'foo', 'bar');
+
+stringify({ foo: 'bar', num: 7 });
+
+arrayPermute([0, 1, 2, 3]);
+
+arraySort([0, 1, -1, 2]);
+
+var hatbar = stringReplace({ string: 'foobar', find: 'foo', replace: 'hat' });

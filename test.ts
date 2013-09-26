@@ -114,28 +114,32 @@ setUserState({
     data: { bestscore: 100, lastscore: 10 }
 });
 
+clone({ foo: 'bar', num: 7 }); // returns a new object {foo: 'bar', num: 7}
 
+var myObject: Object;
+deleteProp(myObject, 'foo');
 
+var cost = getCostBudgetUsed();
 
+getProp(myObject, 'foo');
 
+keys({ foo: 'bar', num: 7 }); // returns ['foo', 'num']
 
+parse('{"foo":"bar","num":7}'); // returns object {foo: 'bar', num: 7}
 
+parseFloat('123.45'); // returns the number 123.45
 
+parseInt('123', 10); // returns the number 123
 
+setProp(myObject, 'foo', 'bar');
 
+stringify({ foo: 'bar', num: 7 }); // returns '{\n foo: "bar",\n num: 7\n}'
 
+arrayPermute([0, 1, 2, 3]); // returns [1, 0, 3, 2], or some other possible permutation
 
+arraySort([0, 1, -1, 2]); // returns [-1, 0, 1, 2]
 
-
-
-
-
-
-
-
-
-
-
+var hatbar = stringReplace({ string: 'foobar', find: 'foo', replace: 'hat' });
 
 
 
