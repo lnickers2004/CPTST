@@ -1582,61 +1582,537 @@ declare function spawn(
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-declare function getMessageUser(message);
+/** 
+  * Returns the user that sent a message received by a handler.
+  * -------------------------------------------
+  * - Returns a user, not to be confused with an entity.
+  *
+  * @param message Message Object from getMessage().
+  */
+declare function getMessageUser(message?: Message): User;
 
-declare function getOwnerUser();
+/** 
+  * Returns your owner user.
+  * -------------------------------------------
+  * - Returns a user, not to be confused with an entity.
+  */
+declare function getOwnerUser(): User;
 
-declare function getUserFields(obj);
+/** 
+  * Retrieves the values for the requested fields from the user, and calls the
+  * callback script with the results.
+  * -------------------------------------------
+  * - Valid fields to request are:
+  *   - display_name' : the displayed name.
+  *   - 'temporary': if the user is temporary.
+  * - Similar in operation to getEntFields, but operates on a user instead of
+  * an ent. An ent is generated for each user when they log in. A user may have
+  * mutiple ents, one for each concurrent login.
+  *
+  * @param obj Argument Object describing what info to request.
+  */
+declare function getUserFields(
+    obj?: {
+        /** The user to inspect. */
+        user: User;
+        /** Fields to include in callback function's context.data. */
+        fields: Array;
+        /** Callback script with its context.data.user set to a user. */
+        callback: Callback;
+        /** Arbitrary object which has its fields copied to the callback
+          * function's context.data. */
+        callback_data?: Callback_Data;
+    }
+): void;
 
-declare function getUserPermission(obj);
+/** 
+  * Returns true if the user has permission over yourself.
+  * -------------------------------------------
+  * - Current only checks the user against yourself. May be extended in
+  * the future to support checks against other entities.
+  *
+  * @param obj Argument Argument Object describing the permission check
+  * to perform.
+  */
+declare function getUserPermission(
+    obj: {
+        /** The user to check. */
+        user: User
+    }
+): boolean;
 
-declare function userIsTemporary(user);
+/** 
+  * Returns true if the user is a temporary user.
+  * -------------------------------------------
+  * - Returns a user, not to be confused with an entity.
+  *
+  * @param user User to check.
+  */
+declare function userIsTemporary(user: User): boolean;
 
-///////////////////////////////////////////////////
-//
-//  Builds
-//
-///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                              *** Builds ***                                //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
-declare function getBuild();
+/** 
+  * Returns your current Build.
+  */
+declare function getBuild(): Build;
 
-declare function getBuildFields(obj);
+/** 
+  * Retrieves the values for the requested fields from the Build, and calls
+  * the callback script with the results.
+  * -------------------------------------------
+  * - Valid fields to request are:
+  *   - 'owner_user' : the owning user.
+  *   - 'display_name' : the displayed name.
+  *   - 'description' : description.
+  *   - 'tags' : tags (array of strings).
+  *   - 'published' : if the build is the published version of a draft.
+  *   - 'draft_build' : the draft build, if this build is published
+  *   - 'published_build' : the published build, if this build is a draft
+  *   - 'likes' : the total number of likes for this build
+  *   - 'comments' : the total number of comments this build has received
+  *   - 'views' : the total number of views this build has received
+  *
+  * @param obj Argument Object describing what info to request.
+  */
+declare function getBuildFields(
+    obj: {
+        /** The Build to inspect. */
+        build?: Build;
+        /** Fields to include in callback function's context.data. */
+        fields: Array;
+        /** Callback function with its context.data.build set to the Build. */
+        callback: Callback;
+        /** Arbitrary object which has its fields copied to the callback
+          * function's context.data. */
+        callback_data?: Callback_Data;
+    }
+): void;
 
-declare function getBuildInstance();
+/** 
+  * Returns your current Build instance.
+  * -------------------------------------------
+  * - 0 is the default instance. Non-zero instances may limit certain
+  * functionality.
+  */
+declare function getBuildInstance(): number;
 
-///////////////////////////////////////////////////
-//
-//  Animation, Particles and Sound
-//
-///////////////////////////////////////////////////
+/** 
+  * Returns true if your current Build is published, or false if your current
+  * Build is a draft.
+  */
+declare function getBuildPublished(): boolean;
 
-declare function animAddSequencer(obj);
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                  *** Animation, Particles and Sound ***                    //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
-declare function animClearSequencer(obj);
+// Particle and sound functions can take a details object which can include
+// the following fields:
+//   - detach - boolean indicating if the particle should be detached when
+// started
+// Sound specific details:
+//   - See soundStart()
+// Particle specific details:
+//   - attach - where to attach the particle, defaults to root
+//   - ignore_rotation - boolean indicating if the particle should ignore
+// the angular velocity or rotation of the host
+//   - overrides - Object describing what particle options to override,
+// see particleStart().
 
-declare function animClickMarker(obj);
+/** 
+  * Pushes a Sequencer and/or Movement Module onto the top of an entity's
+  * sequencer stack.
+  * -------------------------------------------
+  * - This requires at least one of the sequencer or movemod parameters,
+  * otherwise an error will be generated on scriptdebug.
+  *
+  * @param obj Argument Object describing sequencer to add.
+  */
+declare function animAddSequencer(
+    obj: {
+        /** Sequencer to push on entities sequencer stack. */
+        sequencer?: Parameter;
+        /** Movement Module to push on entities sequencer stack. */
+        movemod?: Parameter;
+        /** The entity stack to push sequencer on. */
+        ent?: Entity;
+        /** Time (in seconds) this sequencer should stay active. */
+        duration?: number;
+    }
+): void;
 
-declare function animDetach(obj);
+/** 
+  * Removes a specific or all previously set sequencers from an entity's
+  * sequencer stack.
+  * -------------------------------------------
+  * - To remove a specific Sequencer/Movement Module pair, the sequencer and
+  * movemod parameter should match a call to animAddSequencer.
+  * - If neither a sequencer or movemod parameter is specified, it removes
+  * everything that was pushed onto the sequencer stack
+  *
+  * @param obj Argument Object describing sequencer/movemod (or all) to stop.
+  */
+declare function animClearSequencer(
+    obj?: {
+        /** Sequencer to stop. */
+        sequencer?: Parameter;
+        /** Movement Module to stop. */
+        movemod?: Parameter;
+        /** The entity to stop sequencers on. */
+        ent?: Entity;
+    }
+): void;
 
-declare function animPlay(obj);
+/** 
+  * Animates the clicking player to the marker they clicked on, or specific
+  * player or specific marker.
+  * -------------------------------------------
+  * - See Object Hosted Animation for more details on marker-attached animations.
+  *
+  * @param obj Argument Object describing marker to animate to (or nearest).
+  */
+declare function animClickMarker(
+    obj?: {
+        /** Marker to animate to. */
+        marker_id?: string/* marker */; //own type?
+        /** The entity to animate. */
+        ent?: Entity;
+        /** Instructs the animating client to skip the movement phase of
+          * attaching to a marker, will instead simply interpolate to the marker
+          * position without attempting to walk there first.. */
+        skip_movement?: boolean;
+    }
+): void;
 
-declare function particleFlash(obj);
+/** 
+  * Detaches the specified entity from any animation markers they are attached
+  * to.
+  * -------------------------------------------
+  * - See Object Hosted Animation for more details on marker-attached animations.
+  *
+  * @param obj Argument Object describing marker to animate to (or nearest).
+  */
+declare function animDetach(
+    obj?: {
+        /** The entity to animate. */
+        ent?: Entity;
+    }
+): void;
 
-declare function particleStart(obj);
+/** 
+  * Plays an animation by keyword.
+  * -------------------------------------------
+  * - If a sequencer parameter is provided and the keyword does not exist in
+  * the specified sequencer, an error is generated.
+  *
+  * @param obj Argument Object describing animation to play.
+  */
+declare function animPlay(
+    obj: {
+        /** Animation keyword to play, ignored if the entity's sequencers do not
+          * contain it. */
+        keyword: string;
+        /** The entity to start the animation on. */
+        ent?: Entity;
+        /** Sequencer to use when evaluating this keyword. */
+        sequencer?: Parameter;
+        /** Boolean specifying whether to interrupt the current animation,
+          * or queue this animation to play after the current one finishes. */
+        interrupt?: boolean;
+    }
+): void;
 
-declare function particleStop(handle);
+/** 
+  * Flash a particle emitter.
+  * -------------------------------------------
+  * - For a discussion of particleStart() compared to particleFlash, and details
+  * on the overrides argument, see particleStart#Notes.
+  *
+  * @param obj Argument Object describing particle to flash.
+  */
+declare function particleFlash(
+    obj: {
+        /** The particle parameter to flash. */
+        particle: Parameter;
+        /** The entity to flash the particle on. */
+        ent?: Entity;
+        /** Object with optional particle parameters. */
+        details?: {
+            /** Marker to attach particle to. */
+            attach?: string/* marker name */; //own type?
+            /** Detaches particle when started. */
+            detach?: boolean;
+            /** Don't apply host rotation to particle. */
+            ignore_rotation?: boolean;
+            /** Object describing what particle options to override. */
+            overrides?: Object
+        }
+    }
+): void;
 
-declare function soundFlash(obj);
+/** 
+  * Starts a continuous particle emitter.
+  * -------------------------------------------
+  * - An entity can host at most 4 simultaneous script-generated tracked
+  * particle emitters, sound emitters, or labels, and 5 non-tracked
+  * (flashed/detached).
+  * - If a particle is started detached then it is immediately killed,
+  * respecting the Kill Time particle parameter, which defaults to 1 second.
+  * Because they are immediately stopped, calling particleStop on a detached
+  * particle will do nothing, and therefore a unique handle is not required for
+  * detached particles.
+  * - Non-detached particles started with particleStart() (unlike
+  * particleFlash()) are tracked so that, for example, a 2 minute particle is
+  * being played and a new viewer comes into a scene 1 minute later, their
+  * particle will start 1 minute in. Detached particles and those started with
+  * particleFlash() however are not tracked, so only viewers who are in the
+  * scene when the particle is started will see it.
+  * - Acceptable keys for the 'overrides' element:
+  *   - Movement
+  *     - position: [number, number, number, number]
+  *     - position_jitter: [number, number, number, number]
+  *     - position_radial_jitter: [number, number, number, number]
+  *     - velocity: [number, number, number, number]
+  *     - velocity_jitter: [number, number, number, number]
+  *     - velocity_radial_jitter: [number, number, number, number]
+  *     - accel: [number, number, number, number]
+  *     - accel_jitter: [number, number, number, number]
+  *     - adjust_depth: number
+  *   - Color
+  *     - hue: [number, number, number, number]
+  *     - hue_jitter: [number, number, number, number]
+  *     - hue_time: [number, number, number, number]
+  *     - saturation: [number, number, number, number]
+  *     - saturation_jitter: [number, number, number, number]
+  *     - saturation_time: [number, number, number, number]
+  *     - value: [number, number, number, number]
+  *     - value_jitter: [number, number, number, number]
+  *     - value_time: [number, number, number, number]
+  *     - alpha: [number, number, number, number]
+  *     - alpha_jitter: [number, number, number, number]
+  *     - alpha_time: [number, number, number, number]
+  *   - Scale (Setting y scale only works if "Scale Linked" is unchecked in
+  * source particle)
+  *     - scale_x: [number, number, number, number]
+  *     - scale_x_jitter: [number, number, number, number]
+  *     - scale_x_time: [number, number, number, number]
+  *     - scale_y: [number, number, number, number]
+  *     - scale_y_jitter: [number, number, number, number]
+  *     - scale_y_time: [number, number, number, number]
+  * - Keys recognized, but don't appear to change the particle settings:
+  *   - spawn_rate: number
+  *   - spawn_per: number
+  *   - lifespan: number
+  * - Keys recognized, but not allowed for use in an override:
+  *   - kickstart: bool
+  *   - quad: bool
+  *   - flip_x: bool
+  *   - flip_y: bool
+  *   - velocity_radial_linked: bool
+  *   - scale_linked: bool
+  * - Unknown, unusable or possibly missing override keys
+  *   - attach_velocity
+  *   - orient_by_velocity
+  *
+  * @param obj Argument Object describing particle to start.
+  */
+declare function particleStart(
+    obj: {
+        /** The particle parameter to start. */
+        particle: Parameter;
+        /** The entity to start the particle on. */
+        ent?: Entity;
+        /** Object with optional particle parameters. */
+        details?: {
+            /** Marker to attach particle to. */
+            attach?: string/* marker name */; //own type?
+            /** Detaches particle when started. */
+            detach?: boolean;
+            /** Don't apply host rotation to particle. */
+            ignore_rotation?: boolean;
+            /** Object describing what particle options to override. */
+            overrides?: Object
+        };
+        /** Handle to use for stopping particle. See particleStop(). */
+        handle?: string/* handle name */; //own type?
+        /** Duration to keep particle emitter active, in seconds, if attached to
+          * a player. */
+        duration?: number/* float? */
+    }
+): void;
 
-declare function soundStart(obj);
+/** 
+  * Stops a continuous particle emitter by handle.
+  * -------------------------------------------
+  * - This function is synonomous with soundStop() and labelRemove().
+  *
+  * @param handle Particle to stop.
+  */
+declare function particleStop(handle: string/* handle name */): void; //own type?
 
-declare function soundStop(handle);
+/** 
+  * Emits a one-time sound event.
+  * -------------------------------------------
+  * - For a discussion of soundStart() compared to soundFlash(), and details
+  * about kill_time, see soundStart#Notes.
+  *
+  * @param obj Argument Object describing sound to flash.
+  */
+declare function soundFlash(
+    obj: {
+        /** The sound parameter to flash. */
+        sound: Parameter;
+        /** The entity to flash the sound on. */
+        ent?: Entity;
+        /** Object with optional sound parameters. */
+        details?: {
+            /** Multiplier for sound gain (volume). 0.0 is silent, 1.0 is full
+              * volume. */
+            gain?: number;
+            /** Multiplier for sound playback speed. */
+            playback_rate?: number;
+            /** If the sound loops continuously or not. */
+            loop?: boolean;
+            /** How quickly the sound gain falls off with distance Ex: 'linear'
+              * or 'inverse'. */
+            rolloff_type?: string;
+            /** Distance at which sample should be at max volume. */
+            min_distance?: number;
+            /** Max distance at which sample can no longer be heard. */
+            max_distance?: number;
+            /** Max distance at which sample stops falling off. Meaningless if
+              * greater than max_distance.. */
+            max_falloff_distance?: number;
+            /** Pan sound depending on angle. Useful for ambient sounds.
+              * (Chrome Only). */
+            pan?: boolean;
+            /** Sounds are delayed for each client by the speed of sound
+              * (343 m/s). */
+            travel_delay?: boolean;
+            /** Sounds are filtered so that high frequency sounds fall off with
+              * distance first (Chrome Only). */
+            distance_filter?: boolean;
+            /** If distance_filter is set, this is the frequency in Hz where
+              * the cutoff starts. */
+            distance_filter_frequency?: number;
+            /** Detaches sound when started. */
+            detach?: boolean;
+            /** How long, in seconds, until a sound finishes fading out. */
+            kill_time?: number;
+            /** Position offset (from root) to play sound at. */
+            pos?: VectorPOS
+        }
+    }
+): void;
 
-///////////////////////////////////////////////////
-//
-//  Physics
-//
-///////////////////////////////////////////////////
+/** 
+  * Starts a tracked sound emitter.
+  * -------------------------------------------
+  * - An entity can host at most 4 simultaneous script-generated tracked
+  * particle emitters, sound emitters, or labels, and 5 non-tracked
+  * (flashed/detached).
+  * - max_distance should always be set larger than min_distance.
+  * - If a sound is played detached then it is immediately killed, respecting
+  * kill_time, which defaults to 10 seconds for detached sounds. Because they
+  * are immediately stopped, calling soundStop on a detached sound will do
+  * nothing, and therefore a unique handle is not required for detached sounds.
+  * - If a sound is played normally, the default kill_time is 1 second, so a
+  * stop (either from soundStop() or the entity the sound is attached to is
+  * destroyed) will cause the sound to fade out over 1 seconds. If an instant
+  * stop is desired, set kill_time to 0 seconds.
+  * - kill_time values less than 2 seconds fade out the sound over the specified
+  * time. Values over 2 seconds play normally until the final 2 seconds and then
+  * fade out. This allows short, detached sounds to play the entire clip normally.
+  * - Non-detached sounds started with soundStart() (unlike soundFlash()) are
+  * tracked so that, for example, a 3 minute sound is being played and a new
+  * viewer comes into a scene 1 minute later, their sound will start 1 minute in.
+  * Detached sounds and those started with soundFlash() however are not tracked,
+  * so only viewers who are in the scene when the sound is started will hear the
+  * sound.
+  *
+  * @param obj Argument Object describing sound to start.
+  */
+declare function soundStart(
+    obj: {
+        /** The sound parameter to start. */
+        sound?: Parameter;
+        /** The url for a stream (should be .ogg, but .mp3 will work for chrome
+          * users). */
+        url?: Parameter;
+        /** The entity to start the sound on. */
+        ent?: Entity;
+        /** Object with optional sound parameters. */
+        details?: {
+            /** Multiplier for sound gain (volume). 0.0 is silent, 1.0 is full
+              * volume. */
+            gain?: number;
+            /** Multiplier for sound playback speed. */
+            playback_rate?: number;
+            /** If the sound loops continuously or not. */
+            loop?: boolean;
+            /** How quickly the sound gain falls off with distance Ex: 'linear'
+              * or 'inverse'. */
+            rolloff_type?: string;
+            /** Distance at which sample should be at max volume. */
+            min_distance?: number;
+            /** Max distance at which sample can no longer be heard. */
+            max_distance?: number;
+            /** Max distance at which sample stops falling off. Meaningless if
+              * greater than max_distance.. */
+            max_falloff_distance?: number;
+            /** Pan sound depending on angle. Useful for ambient sounds.
+              * (Chrome Only). */
+            pan?: boolean;
+            /** Sounds are delayed for each client by the speed of sound
+              * (343 m/s). */
+            travel_delay?: boolean;
+            /** Sounds are filtered so that high frequency sounds fall off with
+              * distance first (Chrome Only). */
+            distance_filter?: boolean;
+            /** If distance_filter is set, this is the frequency in Hz where
+              * the cutoff starts. */
+            distance_filter_frequency?: number;
+            /** Detaches sound when started. */
+            detach?: boolean;
+            /** How long, in seconds, until a sound finishes fading out. */
+            kill_time?: number;
+            /** Position offset (from root) to play sound at. */
+            pos?: VectorPOS
+        };
+        /** Handle to use for stopping sound. See soundStop(). */
+        handle?: string/* handle name */; //own type?
+        /** Duration to keep sound emitter active, in seconds, if attached to a 
+          * player. */
+        duration?: number/* float? */
+    }
+): void;
+
+/** 
+  * Stops a tracked sound emitter by handle.
+  * -------------------------------------------
+  * - The stopped sound will fade out based on the kill_time specified when the
+  * sound was created.
+  * - If you wish to stop a sound that is authored as part of the Prefab, create
+  * a Customizer exposing the hidden property of the sound and use
+  * customizerSetValue() to set the hidden customizer to true.
+  * - This function is synonomous with particleStop() and labelRemove().
+  *
+  * @param handle Sound to stop.
+  */
+declare function soundStop(handle: string/* handle name */): void; //own type?
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             *** Physics ***                                //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 declare function applyImpulse(obj);
 

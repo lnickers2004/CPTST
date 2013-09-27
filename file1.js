@@ -60,5 +60,3 @@ handlerCreate({
     channel: 'direct',
     message: 'clickStart'
 });
-
-var MakePoint;

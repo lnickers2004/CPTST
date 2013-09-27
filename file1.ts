@@ -64,5 +64,3 @@ handlerCreate({
 });
 
 
-
-var MakePoint: () => { x: number; y: number; };

@@ -199,6 +199,51 @@ resetSpawned();
 
 spawn({ prefab: 'parameter name', pos: [0, 0, 0], rot: [0, 0, 0], scale: [1, 1, 1], linear: [0, 0, 0], angular: [0, 0, 0], gravity: [0, 0, -9.8], created_data: {}, callback: 'function name', callback_data: {} });
 
+var user = getMessageUser();
+
+var user = getOwnerUser();
+
+getUserFields({ user: getMessageUser(), callback: 'clickerUserName', fields: ['display_name'] });
+
+getUserPermission({ user: getMessageUser() });
+
+userIsTemporary(getMessageUser());
+
+var build = getBuild();
+
+getBuildFields({
+    build: getBuild(),
+    callback: 'buildInfo',
+    fields: ['display_name', 'likes']
+});
+
+var instance = getBuildInstance();
+
+var published = getBuildPublished();
+
+animAddSequencer({ sequencer: 'my_sequencer' });
+
+animClearSequencer({ sequencer: 'my_sequencer' });
+
+animClickMarker({ ent: getMessageEnt() });
+
+animPlay({ keyword: 'run_forward', interrupt: false });
+
+particleFlash({ particle: 'particle_param' });
+
+particleStart({ particle: 'particle_param', handle: 'my_particle' });
+
+particleStop('my_particle');
+
+soundStart({ sound: 'sound_param', handle: 'my_sound' });
+
+soundStop('my_sound');
+
+
+
+
+
+
 
 
 
