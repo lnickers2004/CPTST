@@ -2336,7 +2336,7 @@ declare function setVelAngular(
   * - {vel: [0, 5, 0], world: true} moves 5 meters/s down the world's y axis
   * regardless of the direction you're facing
   *
-  * @param obj OObject describing linear velocity to set.
+  * @param obj Object describing linear velocity to set.
   */
 declare function setVelLinear(
     obj: {
