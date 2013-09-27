@@ -2114,51 +2114,247 @@ declare function soundStop(handle: string/* handle name */): void; //own type?
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-declare function applyImpulse(obj);
+/** 
+  * Applies impulse.
+  * -------------------------------------------
+  * - The entity to be moved must be set to Physical Type: Simulated.
+  * - Passing an array is interpreted as {impulse: array}
+  *
+  * @param obj Object describing the impulse to apply.
+  */
+declare function applyImpulse(
+    obj: {
+        /** The impulse direction and magnitude to apply. */
+        impulse: Vector;
+        /** Entity to apply impulse on. */
+        ent?: Entity;
+    }
+): void;
 
-declare function applyImpulseFrom(obj);
+/** 
+  * Applies outward impulse from the scripted object to nearby ents.
+  * -------------------------------------------
+  * - This is considered a Broadcast, and multiple Broadcasts are limited by the
+  * Broadcast queue - see Script Limits.
+  * - Only affects objects that are Physical Type: Simulated, and players.
+  *
+  * @param obj Object describing the impulse to apply.
+  */
+declare function applyImpulseFrom(
+    obj: {
+        /** The magnitude of the impulse. */
+        mag: number;
+        /** The radius in which to apply the impulse. Mag falls off from center,
+          * hitting 0 at this radius. */
+        radius: number;
+        /** Position offset from object pos
+          * ([0, 1, 0] is 1m in front of object). */
+        pos?: VectorPOS;
+        /** Direction to apply force in, also "shapes" falloff in
+          * that direction. */
+        dir?: Vector;
+    }
+): void;
 
-declare function getGravity();
+/** 
+  * Gets your gravity.
+  */
+declare function getGravity(): VectorVEL;
 
-declare function getMarkerIDs();
+/** 
+  * Gets an array of your marker_ids.
+  */
+declare function getMarkerIDs(): Array; // array (string (marker name))
 
-declare function getMarkerPos(marker_id);
+/** 
+  * Gets the relative position of one of your markers by marker_id.
+  *
+  * @param marker_id The marker id to obtain relative position from.
+  */
+declare function getMarkerPos(marker_id: string/* marker name */): VectorPOS; //own marker type?
 
-declare function getMarkerPosWorld(marker_id);
+/** 
+  * Gets the current world position of one of your markers by marker_id.
+  *
+  * @param marker_id The marker id to obtain relative position from.
+  */
+declare function getMarkerPosWorld(marker_id: string/* marker name */): VectorPOS; //own marker type?
 
-declare function getMarkerRot(marker_id);
+/** 
+  * Gets the relative rotation of one of your markers by marker_id.
+  *
+  * @param marker_id The marker id to obtain relative rotation from.
+  */
+declare function getMarkerRot(marker_id: string/* marker name */): VectorROT; //own marker type?
 
-declare function getMarkerRotWorld(marker_id);
+/** 
+  * Gets the world rotation of one of your markers by marker_id.
+  *
+  * @param marker_id The marker id to obtain rotation from.
+  */
+declare function getMarkerRotWorld(marker_id: string/* marker name */): VectorROT; //own marker type?
 
-declare function getPos();
+/** 
+  * Gets world position of the scripted item.
+  */
+declare function getPos(): VectorPOS;
 
-declare function getRot();
+/** 
+  * Gets world rotation of the scripted item.
+  */
+declare function getRot(): VectorROT;
 
-declare function getScale();
+/** 
+  * Gets world scale of the scripted item.
+  */
+declare function getScale(): VectorSCALE;
 
-declare function getVelAngular();
+/** 
+  * Gets angular velocity of the scripted item.
+  */
+declare function getVelAngular(): VectorVEL;
 
-declare function getVelLinear();
+/** 
+  * Gets angular velocity of the scripted item.
+  */
+declare function getVelLinear(): VectorVEL;
 
-declare function pointToward(obj);
+/** 
+  * Sets rotation to point toward target.
+  * -------------------------------------------
+  * - Passing an array is interpreted as {pos: array}.
+  * - The entity to be moved must be set to Physical Type: Movable or Simulated..
+  *
+  * @param obj Object describing world position to point toward.
+  */
+declare function pointToward(
+    obj: {
+        /** World position to point toward. */
+        pos: VectorPOS;
+        /** Entity to set rotation of. */
+        ent?: Entity;
+    }
+): void;
 
-declare function setGravity(obj);
+/** 
+  * Sets gravity.
+  * -------------------------------------------
+  * - Default gravity is [0, 0, -9.8].
+  *
+  * @param obj Object describing gravity to set.
+  */
+declare function setGravity(
+    obj: {
+        /** Gravity to set. */
+        gravity: VectorVEL;
+        /** Entity to set gravity on. */
+        ent?: Entity;
+    }
+): void;
 
-declare function setPos(obj);
+/** 
+  * Sets position of an ent.
+  * -------------------------------------------
+  * - Passing an array is interpreted as {pos: array}.
+  * - The entity to be moved must be set to Physical Type: Movable or Simulated.
+  *
+  * @param obj Object describing position to set.
+  */
+declare function setPos(
+    obj: {
+        /** Position to set. */
+        pos: VectorPOS;
+        /** Entity to set position of. */
+        ent?: Entity;
+    }
+): void;
 
-declare function setPosRot(obj);
+/** 
+  * Sets position and/or rotation of an ent.
+  * -------------------------------------------
+  * - If both pos and rot are missing, you will get an error on scriptdebug:
+  * - requires a pos or rot
+  * - The entity to be moved must be set to Physical Type: Movable or Simulated.
+  *
+  * @param obj Object describing position and rotation to set.
+  */
+declare function setPosRot(
+    obj: {
+        /** Position to set. */
+        pos: VectorPOS;
+        /** Rotation to set. */
+        rot: VectorROT;
+        /** Entity to set position and rotation of. */
+        ent?: Entity;
+    }
+): void;
 
-declare function setRot(obj);
+/** 
+  * Sets rotation of an ent.
+  * -------------------------------------------
+  * - Passing an array is interpreted as {rot: array}
+  * - The entity to be moved must be set to Physical Type: Movable or Simulated.
+  *
+  * @param obj Object describing rotation to set.
+  */
+declare function setRot(
+    obj: {
+        /** Rotation to set. */
+        rot: VectorROT;
+        /** Entity to set rotation of. */
+        ent?: Entity;
+    }
+): void;
 
-declare function setVelAngular(obj);
+/** 
+  * Sets angular velocity.
+  * -------------------------------------------
+  * - The entity to be moved must be set to Physical Type: Movable or Simulated.
+  * - {vel: [0, 90, 0]} rotates 90 degrees/s around your local forward axis
+  * - {vel: [0, 90, 0], world: true} rotates 90 degrees/s around the world's y
+  * axis
+  *
+  * @param obj Object describing angular velocity to set.
+  */
+declare function setVelAngular(
+    obj: {
+        /** Angular velocity to set. */
+        vel: VectorVEL;
+        /** Flag to specify if velocity is in world space (true) or local space
+          * (false). */
+        world?: boolean;
+        /** Entity to set angular velocity on. */
+        ent?: Entity;
+    }
+): void;
 
-declare function setVelLinear(obj);
+/** 
+  * Sets linear velocity.
+  * -------------------------------------------
+  * - The entity to be moved must be set to Physical Type: Movable or Simulated.
+  * - {vel: [0, 5, 0]} moves 5 meters/s in the direction you're currently facing
+  * - {vel: [0, 5, 0], world: true} moves 5 meters/s down the world's y axis
+  * regardless of the direction you're facing
+  *
+  * @param obj OObject describing linear velocity to set.
+  */
+declare function setVelLinear(
+    obj: {
+        /** Linear velocity to set. */
+        vel: VectorVEL;
+        /** Flag to specify if velocity is in world space (true) or local space
+          * (false). */
+        world?: boolean;
+        /** Entity to set linear velocity on. */
+        ent?: Entity;
+    }
+): void;
 
-///////////////////////////////////////////////////
-//
-//  UI
-//
-///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                *** UI ***                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 declare function controllerCreate(obj);
 

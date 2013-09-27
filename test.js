@@ -235,3 +235,38 @@ particleStop('my_particle');
 soundStart({ sound: 'sound_param', handle: 'my_sound' });
 
 soundStop('my_sound');
+
+applyImpulse({ impulse: [0, 0, 100] });
+
+var myVec1 = { x: 0, y: 0, z: 100 };
+applyImpulse({ impulse: myVec1 });
+
+var myVec2;
+myVec2.x = 0;
+myVec2.y = 0;
+myVec2.z = 100;
+applyImpulse({ impulse: myVec2 });
+
+var gravity = getGravity();
+
+var pos = getMarkerPos('my_marker');
+
+var pos = getMarkerPosWorld('my_marker');
+
+var pos = getMarkerRot('my_marker');
+
+var pos = getMarkerRotWorld('my_marker');
+
+var pos = getPos();
+
+var rot = getRot();
+
+var angular = getVelAngular();
+
+pointToward({ pos: [10, -10, 0] });
+
+setGravity({ gravity: [0, 0, -5] });
+
+setPos({ pos: [-10.4, -9.6, 0.2] });
+
+setPosRot({ pos: [-10.4, -9.6, 0.2], rot: [0, 0, 180] });
