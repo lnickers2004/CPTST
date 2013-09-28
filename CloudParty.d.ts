@@ -1,4 +1,39 @@
 
+interface Context {
+    handler?: Handler;
+    data?: Data;
+    message?: Message;
+    timer?: Timer 
+}
+
+declare var context: Context;
+
+interface Handler {
+    /** Name given to handler. */
+    name: HandlerName;
+    /** The channel the handler listens on. */
+    channel: Channel;
+    /** The message the handler listens for. */
+    message: Message;
+    /** Name given to handler. */
+    script?: string/* function name */;
+    /** Array of entities that can trigger this handler. */
+    ents?: Entities;
+    /** Array of users that can trigger this handler. */
+    users?: Users;
+    /** Initial disabled state of this handler. */
+    disabled?: boolean;
+    /** Arbitrary object which can be retrieved with getHandlerData() in
+      * the function the handler calls. */
+    data?: HandlerData;
+}
+
+//declare var handler: Handler;
+
+interface HandlerName extends String {
+
+}
+
 interface Channel extends String {
 
 }
@@ -14,15 +49,63 @@ interface Channel extends String {
 
 interface Message extends String {
 
+    data?: MessageData;
 }
 
-////declare var Message: Message;
+declare var message: Message;
+
+interface Timer {
+    /** Name given to timer. */
+    name: TimerName;
+    /** Function the timer will call. */
+    script?: string/* function name */;
+    /** How much time passes between firings of the timer. */
+    period?: number;
+    /** How much time passes before first firing of timer. */
+    delay?: number;
+    /** Random time added/subtracted from period cycle.
+      * Does not apply to delay. */
+    jitter?: number;
+    /** How much time passes before first firing of timer. */
+    paused?: boolean;
+    /** Arbitrary object which can be retrieved with getTimerData() in
+      * the function the timer calls. */
+    data?: TimerData;
+}
+
+//declare var timer: Timer;
+
+interface TimerName {
+   (): string
+}
+
+//interface Messages {
+//    [index: number]: Message;
+//}
 
 interface Data extends Object {
 
 }
 
 ////declare var Data: Data;
+
+interface HandlerData extends Data {
+
+}
+
+declare var handlerData: HandlerData;
+
+interface MessageData extends Data {
+
+}
+
+declare var messageData: MessageData;
+
+interface TimerData extends Data {
+
+}
+
+declare var timerData: TimerData;
 
 interface Radius extends Number {
 
@@ -51,6 +134,10 @@ interface State_Key extends Object {
 
 interface User extends Object {
 
+}
+
+interface Users {
+    [index: number]: User;
 }
 
 interface Key extends Object {
@@ -2346,7 +2433,7 @@ declare function setVelLinear(
           * (false). */
         world?: boolean;
         /** Entity to set linear velocity on. */
-        ent?: Entity;
+        ent?: Entity
     }
 ): void;
 
@@ -2356,61 +2443,456 @@ declare function setVelLinear(
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-declare function controllerCreate(obj);
+/** 
+  * Creates a controller on the player's screen that can display status text and
+  * send messages back to you..
+  * -------------------------------------------
+  * - texts: is an optional array of {channel, message, text, tooltip} objects.
+  * Channel and message specify a channel and message the client should listen
+  * for. When a matching message is seen, the message's data's text and tooltip
+  * fields are displayed in the UI, replacing the previous text and/or tooltip.
+  * - buttons: is an optional array of {channel, message, data, text, tooltip,
+  * close} objects. Channel, message and data specify the message sent back to
+  * the script when the player clicks a button.
+  *
+  * @param obj Argument Object describing what to display in the controller.
+  */
+declare function controllerCreate(
+    obj: {
+        /** The entity to present the controller to. */
+        ent: Entity;
+        /** The title of the controller. */
+        title: string;
+        /** Array of {channel, message, text, tooltip} objects. */
+        texts?: {
+            /** Message the controller listens for (on the specified channel)
+            to update this text display. */
+            message: Message;   // Message or string???
+            /** Channel the controller listens on to update this text display. */
+            channel?: Channel;
+            /** Default string to display in the controller until later updated. */
+            text?: string;
+            /** Default string to display when mouse is over text in the
+              * controller until later updated. */
+            tooltip?: string;
+            /** Allow this text display to listen to messages from any entity,
+              * rather than just the entity that created the controller. */
+            open?: boolean
+        };
+        /** Array of {channel, message, data, text, tooltip, close} objects. */
+        buttons?: {
+            /** String to identify this button, defining the message that will
+            be sent back to the script when the button is clicked. */
+            message: Message;   // Message or string???
+            /** Channel the message will be sent on. */
+            channel?: Channel;
+            /** Data to be sent along with the message when this button is
+              * clicked (access with getMessageData()). */
+            data?: someDataObject;
+            /** String to display on the button. */
+            text?: string;
+            /** String to display when mouse is over the button. */
+            tooltip?: string;
+            /** Specifies this button is a dialog close button (the X in the
+              * upper-right corner). */
+            close?: boolean;
+        };
+        /** Keep the controller around after the source entity goes away. */
+        linger?: boolean
+    }
+): void;
 
-declare function controllerHTMLCreate(obj);
+/** 
+  * Creates a controller on the player's screen that can display HTML and send
+  * messages back to you..
+  * -------------------------------------------
+  * - An id can be both a listener and a messager to both send messages when
+  * clicked, and receive updates with controllerMessage()
+  * - The elements with ids marking them as listeners and messagers can be
+  * created dynamically in response to a controllerMessage()
+  * - Nested messagers are allowed, but only one will send a message per click
+  * - A listener with a command will not update its content, instead it will
+  * either close the controller ('close' command), or update the specified value
+  * of the controller ('title', 'width', 'height' or 'padding' command) based on
+  * the value in the message it received.
+  * - The message data sent by a messager, which you can retrieve by calling
+  * getMessageData(), may include an event field. The event field includes data
+  * about the browser event that caused the messager to send the message. For
+  * example, the x and y position of a mouse click, and the width and height of
+  * the messager HTML element.
+  * - A messager that is inside a form will automatically send the values of all
+  * named sibling form elements (text, password, hidden, checkbox, radio and
+  * select elements). You can retrieve this data by calling getMessageData() and
+  * inspecting its form field.
+  * - The maximum size for the controller contents is 600x400 - anything larger
+  * than that will get scroll bars.
+  *
+  * @param obj Argument Object describing what to display in the controller.
+  */
+declare function controllerHTMLCreate(
+    obj: {
+        /** The entity to present the controller to. */
+        ent: Entity;
+        /** The title of the controller (HTML not allowed). */
+        title: string;
+        /** The HTML content of the controller. */
+        html: string;
+        /** Array of {id, message, channel} objects. */
+        listeners?: {
+            /** id of the HTML element that will reflect any matching messages. */
+            id: string;
+            /** Message the controller listens for to update this HTML element
+              * (update with controllerMessage). */
+            message?: Message;   // Message or string???
+            /** Channel the controller listens on to update this HTML element. */
+            channel?: Channel;
+            /** Make the listener uses the message content to either close or
+              * modify the controller itself, based on the command. */
+            command?: string;
+            /** Allow the listener to listen to messages from any entity, rather
+              * than just the entity that created the controller. */
+            open?: boolean
+        };
+        /** Array of {id, message, channel, data} objects . */
+        messagers?: {
+            /** id of the HTML element that will trigger this message when
+              * clicked. */
+            id: string;
+            /** Message sent when this HTML element is clicked. */
+            message?: Message;   // Message or string???
+            /** Channel the controller communicates on for this HTML element. */
+            channel?: Channel;
+            /** Data to be sent along with the message when this element is
+              * clicked (access with getMessageData()). */
+            data?: someDataObject;
+            /** Specifies this messager is a dialog close button (the X in the
+              * upper-right corner). No id is needed. */
+            close?: boolean;
+        };
+        /** Width of HTML controller (minimum is 150). */
+        width?: number/* integer */;
+        /** Height of HTML controller. */
+        height?: number/* integer */;
+        /** Padding of text and images inside of controller. */
+        padding?: number/* integer */;
+        /** Keep the controller around after the source entity goes away. */
+        linger?: boolean
+    }
+): void;
 
-declare function controllerMessage(obj);
+/** 
+  * Sends a controller message to players to update controller texts.
+  * -------------------------------------------
+  * - If either ent or ents is provided, it will send direct messages, otherwise
+  * the message is broadcast to all nearby entities..
+  * - This may be considered a Broadcast, and multiple Broadcasts are limited by
+  * the Broadcast queue - see Script Limits
+  * - The text and tooltip are automatically stringified if they are defined.
+  * - It takes a small amount of time after a controllerCreate or
+  * controllerHTMLCreate before the texts or messagers handlers to become active.
+  * If a controllerMessage is sent too soon after a controller is created,
+  * the message may be lost. If possible, rearrange your code so that as much of
+  * the dynamic information as possible has been gathered before presenting
+  * the controller the first time.
+  *
+  * @param obj Argument Object describing what to update in the controller.
+  */
+declare function controllerMessage(
+    obj: {
+        /** The message the controller is listening for. */
+        message?: Message;   // Message or string???
+        /** The text to use as a replacement. */
+        text?: string;
+        /** Tooltip for the text. */
+        tooltip?: string;
+        /** Channel for the message. */
+        channel?: Channel;
+        /** The entity of the controller to update. */
+        ent?: Entity
+        /** Array of {message, text, tooltip} objects. */
+        messages?: Array<{ message: string; text?: string; tooltip?: string }>;  // !?!?!?!?!?!
+        /** The entities of the controllers to update. */
+        ents?: Entities
+    }
+): void;
 
-declare function dialogCreate(obj);
+/** 
+  * Creates a dialog on the player's screen.
+  * -------------------------------------------
+  * - Either text or url must be specified, but not both.
+  * - The maximum size for url contents is 600x400 - anything larger than that
+  * will get scroll bars.
+  * - If a url is specified, the default behavior for clicking on the link,
+  * rather than the button(s), is whichever button is first. The buttons are
+  * displayed in the order specified in the url_targets array.
+  * - If a url is specified, the external page can send messages back to the
+  * source entity using the javascript postMessage function. For example:
+  *   - window.parent.postMessage({channel: 'dialog', message: 'message',
+  *   data: {say: 'Hello World'}}, 'https://a.cloudparty.com');
+  *   - This feature is experimental and subject to change
+  * - Similarly, the external page can send messages back to the main window
+  * regarding focus and blur state so the main window can properly manage its
+  * active state. For example:
+  *   - window.onfocus = function() { window.parent.postMessage({event: {type: 
+  *   'focus'}}, 'https://a.cloudparty.com'); };
+  *   - window.onblur = function() { window.parent.postMessage({event: {type: 
+  *   'blur'}}, 'https://a.cloudparty.com'); };
+  *   - This feature is experimental and subject to change
+  *
+  * @param obj Argument Object describing what to display in the dialog.
+  */
+declare function dialogCreate(
+    obj: {
+        /** The entity to present the dialog to. */
+        ent: Entity;
+        /** The internal name of the dialog. The client will only display one
+          * dialog per name, additional dialogs will be ignored.. */
+        name?: string;
+        /** The title of the dialog (HTML not allowed). */
+        title: string;
+        /** The text of the dialog (HTML is allowed). */
+        text?: string;
+        /** The full url to display. */
+        url?: string;
+        /** How to open the url. Options are 'frame' and 'blank'.. */
+        url_targets?: Array/* string??? */;
+        /** Width of dialog. */
+        width?: number/* integer */;
+        /** Height of dialog. */
+        height?: number/* integer */;
+        /** Padding of text and images inside dialog.. */
+        padding?: number/* integer */
+    }
+): void;
 
-declare function labelAdd(obj);
+/** 
+  * Adds a customizable label to a player.
+  * -------------------------------------------
+  * - An entity can host at most 4 simultaneous script-generated tracked
+  * particle emitters, sound emitters, and labels.
+  * - Colors are specified using HTML/CSS colors, e.g. #RGB, #RRGGBB, or color
+  * names.
+  * - Labels added to non-players will not be visible under normal circumstances
+  * (they can be shown with /entity_ui_object_name 1, and if you have
+  * a compelling use for them, let Cloud Party know and we can probably get that
+  * working in an appropriate matter).
+  *
+  * @param obj Argument Object describing the label and its parameters.
+  */
+declare function labelAdd(
+    obj: {
+        /** The text contents of the label. Limited to 20 characters. */
+        text: string;
+        /** The entity to add the label to. Should be a player. */
+        ent?: Entity;
+        /** Object with optional styling parameters. */
+        style?: {
+            /** Text color. */
+            color?: string;
+            /** Background color. */
+            backgroundColor?: string;
+            /** Border color. */
+            borderColor?: string
+        };
+        /** Handle to use for removing the label. See labelRemove(). */
+        handle?: string/* handle name */;
+        /** Duration to keep label active, in seconds, if attached to a player. */
+        duration?: number /* float */
+    }
+): void;
 
-declare function labelRemove(handle);
+/** 
+  * Removes a label by handle.
+  * -------------------------------------------
+  * - This function is synonomous with particleStop() and soundStop().
+  *
+  * @param handle Label to remove.
+  */
+declare function labelRemove(handle: string/* handle name */): void;
 
-declare function setTooltip(obj);
+/** 
+  * Sets an ent's tooltip, will remove the tooltip if the tooltip text is empty.
+  * -------------------------------------------
+  * - Passing a string is interpreted as {tooltip: string}.
+  *
+  * @param obj Argument Object describing what to display in the controller.
+  */
+declare function setTooltip(
+    obj: {
+        /** The text of the tooltip. */
+        tooltip: string;
+        /** The entity to set the Tooltip on. */
+        ent?: Entity;
+    }
+);
 
-///////////////////////////////////////////////////
-//
-//  Script Calling
-//
-///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                          *** Script Calling ***                            //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
-declare function call(obj);
+/** 
+  * Calls a function by name, passes the optional data.
+  * -------------------------------------------
+  * - Passing a string is interpreted as {script: string}.
+  * - Only provided for completeness. The same can be accomplished by using
+  * the function name. Ex: myFunction() or myFunction( {foo: 'bar'} )
+  * - The key 'script' is somewhat misleading. It is technically a function that
+  * it is calling.
+  *
+  * @param obj Object describing function to call.
+  */
+declare function call(
+    obj: {
+        /** Name of function to call. */
+        script: string/* function name */;
+        /** Arbitrary object passed as context.data. */
+        data?: someDataObject;
+    }
+): any;
 
-declare function getHandler();
+/** 
+  * Checks if a script function exists by name
+  *
+  * @param func Name of function to check.
+  */
+declare function getFunction(func: string/* function name */): string/* function name */;
 
-declare function getHandlerData(handler?: Object);
+/** 
+  * Returns the handler object (context.handler) in a function called by
+  * a handler.
+  */
+declare function getHandler(): Context.handler;
 
-declare function getMessage();
+/** 
+  * Returns the handler data object in a function called by a handler
+  *
+  * @param handler Handler Object from getHandler().
+  */
+declare function getHandlerData(handler?: Handler): HandlerData;
 
-declare function getMessageData(message);
+/** 
+  * Returns the message object received by a handler
+  */
+declare function getMessage(): Message;
 
-declare function getTimer();
+/** 
+  * Returns the message object received by a handler
+  */
+declare function getMessageData(message: Message): MessageData;
 
-declare function getTimerData(timer);
+/** 
+  * Returns the timer object (context.timer) in a function called by a timer
+  */
+declare function getTimer(): Timer;
 
-declare function handlerCreate(handler): void;
+/** 
+  * Returns the timer object data in a function called by a timer
+  */
+declare function getTimerData(timer: Timer): TimerData;
 
-declare function handlerDestroy(name);
+/** 
+  * Creates a new handler
+  * -------------------------------------------
+  * - See Script Messages for a list of pre-defined channels and messages.
+  *
+  * @param handler Object describing handler to create().
+  */
+declare function handlerCreate(handler: Handler): void;
 
-declare function handlerSetDisabled(name, disabled);
+/** 
+  * Destroys an existing handler
+  *
+  * @param name The name of the handler to destroy.
+  */
+declare function handlerDestroy(name: HandlerName): void;
 
-declare function scriptSetDisabled(name, disabled);
+/** 
+  * Disables or enables a handler
+  *
+  * @param name The name of the handler to disable/enable.
+  * @param disabled Flag to disable/enable handler (true disables handler).
+  */
+declare function handlerSetDisabled(name: HandlerName, disabled?: boolean): void;
 
-declare function timerCreate(obj);
+/** 
+  * Disables or enables a handler
+  *
+  * @param name The name of the function to disable/enable.
+  * @param disabled Flag to disable/enable function (true disables function).
+  */
+declare function scriptSetDisabled(
+    name: string/* function name */,
+    disabled: boolean
+): void;
 
-declare function timerDestroy(name);
+/** 
+  * Creates a new timer.
+  * -------------------------------------------
+  * - A jitter of 0.5 and a period of 10 means each period is anywhere from 9.5
+  * to 10.5 seconds. If no jitter is specified, the period time is always as
+  * specified.
+  * - When specifying a period only, the timer will fire immediately, and then
+  * again every set number of seconds. If you do not want it to fire immediately,
+  * specify a delay also.
+  * - The minimum time between timer events is currently .066 seconds (15 times
+  * a second). Period values below that will be set to .066.
+  *
+  * @param timer Object describing timer to create.
+  */
+declare function timerCreate(timer: Timer): void;
 
-declare function timerSetPaused(name, paused);
+/** 
+  * Destroys an existing timer
+  *
+  * @param name The name of the timer to destroy.
+  */
+declare function timerDestroy(name: TimerName): void;
 
-///////////////////////////////////////////////////
-//
-//  Player Interaction
-//
-///////////////////////////////////////////////////
+/** 
+  * Pauses or unpauses a timer.
+  *
+  * @param name The name of the timer to pause/unpause.
+  * @param paused Flag to stop/start timer (true pauses timer)
+  */
+declare function timerSetPaused(name: TimerName, paused: boolean): void;
 
-declare function teleport(obj);
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        *** Player Interaction ***                          //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+interface IBUILD extends Object{
+
+}
+
+interface ITeleportDestination {
+    /** Target Build. */
+    build?: IBUILD;
+    /** Target Position. */
+    pos: VectorPOS;
+    /** Target yaw, in degrees. */
+    yaw: number;
+}
+
+/** 
+  * Teleports a player entity to a new Build or location.
+  * -------------------------------------------
+  * - Requires confirmation from the user if there is a Build change
+  * - In-Build teleports will trigger the teleport movement controller
+  * - Can only be called as a result of a click message handler
+  * - You can get these values from your URL:
+  * https://www.cloudparty.com/loc/2000/-10.4,-9.6,0.2,0
+  * Breakdown is:
+  * /loc/build/pos1,pos2,pos3,yaw,
+  * so :
+  * {build: 2000, pos: [-10.4,-9.6,0.2], yaw: 0}
+  *
+  * @param obj Object describing teleport destination.
+  */
+declare function teleport(obj: ITeleportDestination): void;
 
 ///////////////////////////////////////////////////
 //
