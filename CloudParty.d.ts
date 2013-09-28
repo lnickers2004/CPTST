@@ -2894,29 +2894,125 @@ interface ITeleportDestination {
   */
 declare function teleport(obj: ITeleportDestination): void;
 
-///////////////////////////////////////////////////
-//
-//  Commerce
-//
-///////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                              *** Commerce ***                              //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
-declare function marketCheckOwnership(obj);
+interface IMarketOwnershipInfo {
+    /** The user to check ownership for. */
+    user: User;
+    /** Market listing parameter. */
+    market_listing: Parameter/* market listing) */;
+    /** Callback script with its context.data.is_owned set to a true if and only
+      * if the user owns the market listing. */
+    callback: Callback;
+    /** Arbitrary object which has its fields copied to the callback function's
+      * context.data. */
+    callback_data?: Callback_Data
+}
 
-declare function marketSellToUser(obj);
+interface IContextData {
+    /**  */
+    is_owned?;
+    /**  */
+    is_returnable;
+    /**  */
+    user
+}
 
-///////////////////////////////////////////////////
-//
-//  External Communication
-//
-///////////////////////////////////////////////////
+/** 
+  * Checks if a user currently owns a market listing.
+  * -------------------------------------------
+  * - context.data.is_owned in the callback is set to true if the user owns the
+  * market listing
+  * - context.data.is_returnable in the callback is set to true if the user
+  * purchased the market listing within the last 24 hours and is currently able
+  * to return the purchased items
+  * - context.data.user in the callback is set to the user that was queried
+  * - The callback has the same click handler status as when this function is
+  * called, which allows you to call marketSellToUser inside the callback
+  *
+  * @param obj Argument Object describing what info to request.
+  */
+declare function marketCheckOwnership(obj: IMarketOwnershipInfo): void;
 
-declare function httpRequest(obj);
+interface IMarketListingSale {
+    /** Market listing parameter. */
+    market_listing: Parameter/* market listing) */;
+    /** Entity of the user to whom the market listing will be sold. */
+    user_ent: User;
+    /** If set, overrides the price in the market listing for this single
+      * transaction. */
+    price_override?: Callback;
+    /** Message to display in the market listing display popup and in the user's
+      * purchase history. */
+    message?: string
+}
+
+/** 
+  * Sells a market listing to a user.
+  * -------------------------------------------
+  * - Works with unlisted or listed market listings.
+  * - Can only be called as a result of a click handler.
+  * - price_override is not allowed during the Marketplace beta period.
+  *
+  * @param obj Argument Object describing what to sell.
+  */
+declare function marketSellToUser(obj: IMarketListingSale): void;
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                       *** External Communication ***                       //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+interface IHTTPRequest {
+    /** Target URL. */
+    url: string;
+    /** Optional headers. */
+    headers?: Object;
+    /** Request method, defaults to 'GET'. */
+    method?: string;
+    /** Request body */
+    body?: string;
+    /** Callback function for request results, context.data fields may include
+      * err, http_response and http_status. */
+    callback: Callback;
+    /** Arbitrary object which has its fields copied to the callback function's
+      * context.data. */
+    callback_data?: Callback_Data;
+    /** Flag indicating the reponse is expected to be a JSON string, and to
+      * automatically parse it. */
+    parse_response?: boolean
+}
+
+/** 
+  * Makes an HTTP request to an external URL.
+  * -------------------------------------------
+  * - The url must include the protocol (either http or https).
+  * - The url may also include auth, port and query
+  * (e.g. https://user:pass@host.com:8080/a/b/c/d?query=string).
+  * - The Content-Length header is automatically set to the correct value if
+  * a body is provided.
+  * - Multiple requests are limited by a queue - see Script Limits
+  *
+  * @param obj Object describing HTTP request.
+  */
+declare function httpRequest(obj: IHTTPRequest): void;
 
 ///////////////////////////////////////////////////
 //
 //  Customizers
 //
 ///////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                            *** Customizers ***                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 declare function customizerSet(obj);
 
