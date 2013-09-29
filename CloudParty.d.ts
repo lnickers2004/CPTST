@@ -2900,7 +2900,7 @@ declare function teleport(obj: ITeleportDestination): void;
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-interface IMarketOwnershipInfo {
+interface MarketOwnershipInfo {
     /** The user to check ownership for. */
     user: User;
     /** Market listing parameter. */
@@ -2913,7 +2913,7 @@ interface IMarketOwnershipInfo {
     callback_data?: Callback_Data
 }
 
-interface IContextData {
+interface ContextData {
     /**  */
     is_owned?;
     /**  */
@@ -2936,9 +2936,9 @@ interface IContextData {
   *
   * @param obj Argument Object describing what info to request.
   */
-declare function marketCheckOwnership(obj: IMarketOwnershipInfo): void;
+declare function marketCheckOwnership(obj: MarketOwnershipInfo): void;
 
-interface IMarketListingSale {
+interface MarketListingSale {
     /** Market listing parameter. */
     market_listing: Parameter/* market listing) */;
     /** Entity of the user to whom the market listing will be sold. */
@@ -2960,7 +2960,7 @@ interface IMarketListingSale {
   *
   * @param obj Argument Object describing what to sell.
   */
-declare function marketSellToUser(obj: IMarketListingSale): void;
+declare function marketSellToUser(obj: MarketListingSale): void;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -2968,7 +2968,7 @@ declare function marketSellToUser(obj: IMarketListingSale): void;
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-interface IHTTPRequest {
+interface HTTPRequest {
     /** Target URL. */
     url: string;
     /** Optional headers. */
@@ -3000,7 +3000,7 @@ interface IHTTPRequest {
   *
   * @param obj Object describing HTTP request.
   */
-declare function httpRequest(obj: IHTTPRequest): void;
+declare function httpRequest(obj: HTTPRequest): void;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -3008,12 +3008,115 @@ declare function httpRequest(obj: IHTTPRequest): void;
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-declare function customizerSet(obj);
+interface CustomizerName {
+    (): string
+}
 
-declare function customizerSetFromParam(customizer_name, param_name);
+interface CustomizerValue {
+    (): any
+}
 
-declare function customizerSetFromParamPersist(customizer_name, param_name);
+interface ParamName {
+    (): string
+}
 
-declare function customizerSetValue(customizer_name, value);
+interface Customizer {
+    /** Name of customizer. */
+    name?: CustomizerName;
+    /** Target entity. */
+    ent?: Entity;
+    /** Simple value for the customizer. */
+    value?: CustomizerValue;
+    /** Name of appropriately-typed parameter (on yourself) to use as the value
+      * for the customizer. */
+    param?: ParamName;
+    /** Whether this is a persistent change. */
+    persist?: boolean
+}
 
-declare function customizerSetValuePersist(customizer_name, value);
+/** 
+  * Sets a customizer on an entity.
+  * -------------------------------------------
+  * - Either value or param must be specified, but not both.
+  * - Value can be specified as undefined, which will revert the customizer to
+  * its default value.
+  * - There are many cases where persisting a customizer change is not allowed.
+  * If this is the case, the change is silently downgrade to temporary.
+  * - If a param is specified, the customizer value type must match or else
+  * the change will be silently ignored.
+  * - This will generate a direct/customizerSet message on the target entity.
+  * - You can also set the customizers of a spawned child immediately using
+  * the customizers parameter of spawn()
+  *
+  * @param obj Object describing customizer changes.
+  */
+declare function customizerSet(obj: Customizer): void;
+
+/** 
+  * *Deprecated in favor of customizerSet* Sets a customizer value on the entity,
+  * not persisted (value lasts until entity is reset). Value comes from a script
+  * parameter.
+  * -------------------------------------------
+  * - Customizer value type must match what the customizer on the entity is
+  * expecting or else it will be silently ignored.
+  *
+  * @param customizer_name Name of customizer exposed on the entity. Customizer
+  * must be settable by script.
+  * @param param_name Name of script parameter from which to set the value of
+  * the customizer.
+  */
+declare function customizerSetFromParam(
+    customizer_name: CustomizerName,
+    param_name: ParamName
+    ): void;
+
+/** 
+  * *Deprecated in favor of customizerSet* Sets a customizer value on the entity,
+  * persisted (value lasts until set again). Value comes from a script parameter.
+  * -------------------------------------------
+  * - Customizer value type must match what the customizer on the entity is
+  * expecting or else it will be silently ignored..
+  *
+  * @param customizer_name Name of customizer exposed on the entity. Customizer
+  * must be settable by script.
+  * @param param_name Name of script parameter from which to set the value of
+  * the customizer.
+  */
+declare function customizerSetFromParamPersist(
+    customizer_name: CustomizerName,
+    param_name: ParamName
+    ): void;
+
+/** 
+  * *Deprecated in favor of customizerSet* Sets a customizer value on the entity,
+  * not persisted (value lasts until entity is reset).
+  * -------------------------------------------
+  * - Customizer value type must match what the customizer on the entity is
+  * expecting or else it will be silently ignored.
+  *
+  * @param customizer_name Name of customizer exposed on the entity. Customizer
+  * must be settable by script.
+  * @param value New value for the customizer. May be a string, boolean, number,
+  * or array.
+  */
+declare function customizerSetValue(
+    customizer_name: CustomizerName,
+    value?: CustomizerValue
+    ): void;
+
+/** 
+  * *Deprecated in favor of customizerSet* Sets a customizer value on the entity,
+  * persisted (value lasts until set again).
+  * -------------------------------------------
+  * - Customizer value type must match what the customizer on the entity is
+  * expecting or else it will be silently ignored.
+  *
+  * @param customizer_name Name of customizer exposed on the entity. Customizer
+  * must be settable by script.
+  * @param value New value for the customizer. May be a string, boolean, number,
+  * or array.
+  */
+declare function customizerSetValuePersist(
+    customizer_name: CustomizerName,
+    value?: CustomizerValue
+    ): void;
